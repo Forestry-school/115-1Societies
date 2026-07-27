@@ -29,18 +29,19 @@
     --radius-md: 18px;
     --radius-sm: 12px;
     --shadow: 0 12px 30px -12px rgba(43, 58, 58, 0.18);
-    --shadow-sm: 0 6px 16px -8px rgba(43, 58, 58, 0.15);
   }
 
   * { box-sizing: border-box; }
 
   html, body {
     width: 100%;
-    overflow-x: hidden; /* 徹底杜絕手機左右滑動跑版 */
+    overflow-x: hidden;
     background: var(--bg);
     font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
     color: var(--ink);
     position: relative;
+    margin: 0;
+    padding: 0;
   }
 
   /* 背景四角柔和色塊裝飾 */
@@ -69,14 +70,13 @@
   /* 校徽與標頭 */
   .header-block { text-align: center; margin-bottom: 22px; }
   .header-block img {
-    width: 85%;            /* 手機版佔據上方容器的 85% 寬度 */
-    max-width: 280px;      /* 電腦版或大螢幕最多放大到 280px */
-    height: auto;          /* 等比例高度 */
+    width: 85%;
+    max-width: 280px;
+    height: auto;
     display: block;
     margin: 0 auto 12px;
   }
   .header-block h4 {
-    font-family: "Noto Sans TC", sans-serif;
     font-weight: 900;
     font-size: 1.35rem;
     margin: 0 0 4px;
@@ -87,7 +87,6 @@
     font-weight: 500;
     font-size: 0.85rem;
     color: var(--ink-soft);
-    letter-spacing: 0.03em;
   }
 
   .card {
@@ -107,7 +106,6 @@
     font-weight: 700;
     font-size: 0.8rem;
     color: var(--primary-dark);
-    letter-spacing: 0.04em;
     margin-bottom: 14px;
   }
   .step-eyebrow .num {
@@ -143,13 +141,10 @@
     font-family: inherit;
     color: var(--ink);
     margin-bottom: 16px;
-    transition: border-color 0.15s ease, background-color 0.15s ease;
   }
-  select.form-select:last-of-type { margin-bottom: 0; }
-  select.form-select:focus { outline: none; border-color: var(--primary); background-color: #fff; }
   select.form-select:disabled { opacity: 0.55; }
 
-  /* 學生點名列表 */
+  /* 學生清單 */
   #studentList { display: flex; flex-direction: column; gap: 10px; }
 
   #studentList > div {
@@ -160,7 +155,6 @@
     background: var(--bg);
     border-radius: var(--radius-md);
     padding: 12px 14px;
-    border-bottom: none !important;
   }
 
   #studentList .badge {
@@ -175,84 +169,40 @@
     margin-bottom: 4px;
   }
 
-  #studentList .fw-bold {
-    font-weight: 700;
-    font-size: 1.02rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+  #studentList .fw-bold { font-weight: 700; font-size: 1.02rem; }
 
-  /* 出席狀態圓角分段膠囊按鈕 */
   .status-btn-group {
     display: inline-flex;
     background: #fff;
     border-radius: 999px;
     padding: 3px;
     gap: 2px;
-    flex-shrink: 0;
     box-shadow: inset 0 0 0 1.5px #E7EEE7;
   }
   .status-btn-group input[type="radio"] { display: none; }
   .status-btn-group label {
     padding: 7px 12px;
-    border: none;
     border-radius: 999px;
     cursor: pointer;
     font-size: 0.8rem;
     font-weight: 700;
     color: var(--ink-soft);
-    white-space: nowrap;
     transition: all 0.15s ease;
   }
   .status-btn-group input[value="出席"]:checked + label { background: var(--primary); color: #fff; }
   .status-btn-group input[value="請假"]:checked + label { background: var(--yellow); color: #5A4200; }
   .status-btn-group input[value="缺席"]:checked + label { background: var(--coral); color: #fff; }
 
-  .alert-warning {
-    background: var(--yellow-tint);
-    color: #8A6200;
-    border-radius: var(--radius-md);
-    padding: 14px;
-    font-size: 0.9rem;
-    text-align: center;
-  }
-
-  .text-muted, .loading-note { color: var(--ink-soft) !important; }
-
-  /* 簽名板 */
-  #canvas-container {
-    width: 100%;
-    border: 2.5px dashed #CFE3D3;
-    border-radius: var(--radius-md);
-    background: #fff;
-    touch-action: none;
-    overflow: hidden;
-  }
-  canvas {
-    width: 100% !important;
-    height: 160px !important;
-    display: block;
-    touch-action: none;
-  }
-
-  /* 按鈕 */
+  /* 按鈕樣式 */
   button {
-    font-family: "Noto Sans TC", sans-serif;
+    font-family: inherit;
     border: none;
     cursor: pointer;
     font-weight: 700;
     border-radius: var(--radius-sm);
-    transition: transform 0.1s ease, box-shadow 0.1s ease, opacity 0.1s ease;
+    transition: transform 0.1s ease;
   }
   button:active { transform: scale(0.97); }
-
-  .btn-outline-secondary {
-    background: var(--bg);
-    color: var(--ink-soft);
-    padding: 10px 16px;
-    font-size: 0.85rem;
-  }
 
   .btn-primary {
     width: 100%;
@@ -262,12 +212,94 @@
     font-size: 1rem;
     box-shadow: 0 8px 18px -6px rgba(69, 182, 110, 0.55);
   }
-  .btn-primary:hover { background: var(--primary-dark); }
-
-  small.text-muted {
-    font-family: "Baloo 2", sans-serif;
-    font-size: 0.75rem;
+  
+  .btn-outline {
+    width: 100%;
+    background: #fff;
+    border: 2px dashed var(--primary);
+    color: var(--primary-dark);
+    padding: 16px;
+    font-size: 1rem;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
   }
+
+  .btn-secondary {
+    background: var(--bg);
+    color: var(--ink-soft);
+    padding: 12px 20px;
+    font-size: 0.9rem;
+  }
+
+  /* 簽名預覽區 */
+  .signature-preview-box {
+    border: 2px solid var(--primary-tint);
+    border-radius: var(--radius-md);
+    padding: 12px;
+    background: #FAFDFB;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  .signature-preview-box img {
+    max-width: 100%;
+    height: 100px;
+    object-fit: contain;
+  }
+
+  /* 獨立全螢幕簽名 Modal 彈窗 */
+  .modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(43, 58, 58, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  .modal-overlay.active { display: flex; }
+
+  .modal-card {
+    background: #fff;
+    width: 100%;
+    max-width: 600px;
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .modal-header h3 { margin: 0; font-size: 1.1rem; color: var(--ink); }
+
+  #modal-canvas-container {
+    width: 100%;
+    height: 280px; /* 大畫布，超好寫 */
+    border: 2.5px dashed #CFE3D3;
+    border-radius: var(--radius-md);
+    background: #fff;
+    touch-action: none;
+  }
+  #modal-signature-pad {
+    width: 100%;
+    height: 100%;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+  }
+  .modal-actions button { flex: 1; }
 </style>
 </head>
 <body>
@@ -285,7 +317,7 @@
       <div class="sub">Forestry School Club Rollcall</div>
     </div>
 
-    <!-- 步驟 1: 選擇學段與社團 -->
+    <!-- 步驟 1: 選擇社團 -->
     <div class="card">
       <div class="step-eyebrow"><span class="num">1</span>選擇社團</div>
       <label class="form-label">選擇學段 / 時間</label>
@@ -302,72 +334,127 @@
       </select>
     </div>
 
-    <!-- 步驟 2: 學生點名清單 -->
+    <!-- 步驟 2: 學生點名 -->
     <div id="rollcallSection" class="card" style="display: none;">
       <div class="step-eyebrow"><span class="num">2</span>學生點名（預設全員出席）</div>
       <div id="studentList"></div>
     </div>
 
-    <!-- 步驟 3: 指導老師親筆簽名 -->
+    <!-- 步驟 3: 簽名確認與送出 -->
     <div id="signatureSection" class="card" style="display: none;">
       <div class="step-eyebrow"><span class="num">3</span>指導老師簽名確認</div>
-      <div id="canvas-container" class="mb-2">
-        <canvas id="signature-pad"></canvas>
+      
+      <!-- 未簽名狀態顯示的按鈕 -->
+      <button id="openSignatureBtn" class="btn-outline" onclick="openSignatureModal()">
+        ✍️ 點此開啟大畫布手寫簽名
+      </button>
+
+      <!-- 已簽名完成後的預覽圖 -->
+      <div id="signaturePreview" class="signature-preview-box" style="display: none;">
+        <div style="font-size: 0.8rem; color: var(--ink-soft); margin-bottom: 6px;">指導老師親筆簽名：</div>
+        <img id="previewImg" src="" alt="指導老師簽名">
+        <div style="margin-top: 8px;">
+          <button class="btn-secondary" onclick="openSignatureModal()" style="padding: 6px 14px; font-size: 0.8rem;">重新簽名</button>
+        </div>
       </div>
-      <div class="d-flex justify-content-between align-items-center" style="display:flex; justify-content:space-between; align-items:center; margin: 10px 0 16px;">
-        <button class="btn-outline-secondary" onclick="clearSignature()">重新簽名</button>
-        <small class="text-muted">請在上方畫布手寫簽名</small>
+
+      <button class="btn-primary" style="margin-top: 16px;" onclick="submitRollcall()">確認送出點名</button>
+    </div>
+  </div>
+
+  <!-- 獨立大畫布 Modal 視窗 -->
+  <div id="signatureModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>✍️ 請指導老師親筆簽名</h3>
+        <span style="font-size: 0.8rem; color: var(--ink-soft);">（請使用全空白處簽名）</span>
       </div>
-      <button class="btn-primary" onclick="submitRollcall()">確認送出點名</button>
+      
+      <div id="modal-canvas-container">
+        <canvas id="modal-signature-pad"></canvas>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="clearModalSignature()">重寫</button>
+        <button class="btn-primary" onclick="saveModalSignature()">完成簽名</button>
+      </div>
     </div>
   </div>
 
   <script>
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz2hL5IREZFWhJiwMwSLcMkMP1oPPczBOZLmMpKfYDnrXxzdhuHlGYpvON7zKlQ23BD/exec";
 
-    let signaturePad;
-    let lastCanvasWidth = 0; // 記錄前一次寬度，防止手機滑動時重複觸發重繪
+    let modalSignaturePad;
+    let signatureDataURL = ""; // 儲存簽名圖檔
 
     window.onload = function() {
-      const canvas = document.getElementById('signature-pad');
-      signaturePad = new SignaturePad(canvas, {
+      const canvas = document.getElementById('modal-signature-pad');
+      modalSignaturePad = new SignaturePad(canvas, {
         backgroundColor: 'rgb(255, 255, 255)',
         penColor: 'rgb(0, 0, 0)'
       });
 
-      resizeCanvas(true);
-
-      // 只有在螢幕寬度真正改變時才重繪，避免手機上下滾動觸發 resize
-      window.addEventListener("resize", () => {
-        if (canvas.offsetWidth !== lastCanvasWidth) {
-          resizeCanvas(false);
-        }
-      });
+      // 旋轉手機時自動調整畫布大小
+      window.addEventListener("resize", resizeModalCanvas);
     };
 
-    // 調整 Canvas 解析度與尺寸（帶有筆跡保存功能）
-    function resizeCanvas(forceClear) {
-      const canvas = document.getElementById('signature-pad');
-      if (!canvas) return;
+    // 開啟簽名彈窗
+    function openSignatureModal() {
+      const modal = document.getElementById('signatureModal');
+      modal.classList.add('active');
+      setTimeout(() => {
+        resizeModalCanvas();
+      }, 100);
+    }
 
-      lastCanvasWidth = canvas.offsetWidth;
+    // 調整畫布清晰度與大小
+    function resizeModalCanvas() {
+      const canvas = document.getElementById('modal-signature-pad');
+      const container = document.getElementById('modal-canvas-container');
+      if (!canvas || !container) return;
+
       const ratio = Math.max(window.devicePixelRatio || 1, 1);
-
+      
       let data = null;
-      if (!forceClear && signaturePad && !signaturePad.isEmpty()) {
-        data = signaturePad.toData();
+      if (modalSignaturePad && !modalSignaturePad.isEmpty()) {
+        data = modalSignaturePad.toData();
       }
 
-      canvas.width = canvas.offsetWidth * ratio;
-      canvas.height = canvas.offsetHeight * ratio;
+      canvas.width = container.offsetWidth * ratio;
+      canvas.height = container.offsetHeight * ratio;
       canvas.getContext("2d").scale(ratio, ratio);
 
-      if (signaturePad) {
-        signaturePad.clear();
+      if (modalSignaturePad) {
+        modalSignaturePad.clear();
         if (data) {
-          signaturePad.fromData(data); // 復原簽名軌跡
+          modalSignaturePad.fromData(data);
         }
       }
+    }
+
+    // 清空簽名
+    function clearModalSignature() {
+      if (modalSignaturePad) {
+        modalSignaturePad.clear();
+      }
+    }
+
+    // 儲存簽名並回到主畫面
+    function saveModalSignature() {
+      if (!modalSignaturePad || modalSignaturePad.isEmpty()) {
+        alert("請完成簽名後再點選「完成簽名」！");
+        return;
+      }
+
+      signatureDataURL = modalSignaturePad.toDataURL('image/png');
+      
+      // 更新主畫面顯示
+      document.getElementById('openSignatureBtn').style.display = 'none';
+      document.getElementById('signaturePreview').style.display = 'block';
+      document.getElementById('previewImg').src = signatureDataURL;
+
+      // 關閉 Modal
+      document.getElementById('signatureModal').classList.remove('active');
     }
 
     function filterClubs() {
@@ -403,7 +490,7 @@
       if (!clubId) return;
 
       const studentListDiv = document.getElementById("studentList");
-      studentListDiv.innerHTML = '<div class="loading-note text-center py-3" style="text-align:center; padding: 12px 0;">正在載入學生名單...</div>';
+      studentListDiv.innerHTML = '<div style="text-align:center; padding: 12px 0; color: var(--ink-soft);">正在載入學生名單...</div>';
       document.getElementById("rollcallSection").style.display = "block";
 
       fetch(`${GAS_WEB_APP_URL}?action=getStudents&clubId=${encodeURIComponent(clubId)}`)
@@ -411,7 +498,7 @@
         .then(students => {
           studentListDiv.innerHTML = "";
           if (students.length === 0) {
-            studentListDiv.innerHTML = '<div class="alert-warning">此社團目前沒有學生資料。</div>';
+            studentListDiv.innerHTML = '<div style="background: var(--yellow-tint); color: #8A6200; border-radius: 12px; padding: 14px; text-align: center;">此社團目前沒有學生資料。</div>';
             return;
           }
 
@@ -435,22 +522,14 @@
           });
 
           document.getElementById("signatureSection").style.display = "block";
-
-          setTimeout(() => {
-            resizeCanvas(false);
-          }, 200);
         });
     }
 
-    function clearSignature() {
-      if (signaturePad) {
-        signaturePad.clear();
-      }
-    }
-
+    // ⚡ 包含時間帶入與完整資料送出
     function submitRollcall() {
-      if (!signaturePad || signaturePad.isEmpty()) {
+      if (!signatureDataURL) {
         alert("請指導老師完成親筆簽名後再送出！");
+        openSignatureModal();
         return;
       }
 
@@ -467,14 +546,19 @@
         records.push({ seat: seat, name: name, status: status });
       });
 
+      const now = new Date();
+      const currentDate = now.toLocaleDateString('zh-TW'); // 格式: yyyy/M/d
+      const currentTime = now.toTimeString().split(' ')[0]; // 格式: HH:mm:ss
+
       const payload = {
         action: "saveRollcall",
         school: "福瑞斯特中小學",
         semester: "115-1",
         clubId: clubId,
         clubName: clubName,
-        date: new Date().toLocaleDateString('zh-TW'),
-        signature: signaturePad.toDataURL('image/png'),
+        date: currentDate,
+        time: currentTime, // 帶入點名時間
+        signature: signatureDataURL,
         records: records
       };
 
