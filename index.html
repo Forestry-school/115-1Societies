@@ -6,29 +6,28 @@
 <title>福瑞斯特中小學 - 115-1 社團點名系統</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700;900&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
 <!-- Signature Pad 手寫簽名套件 -->
 <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
 <style>
   :root {
-    --bg: #F4F9F1;
-    --card: #FFFFFF;
-    --ink: #2B3A3A;
-    --ink-soft: #6E7E7C;
-    --primary: #45B66E;
-    --primary-dark: #2F9A57;
-    --primary-tint: #E3F6E9;
-    --yellow: #FFC857;
-    --yellow-tint: #FFF4DC;
-    --coral: #FF7F6B;
-    --coral-tint: #FFE6E1;
-    --blue: #6FB1E8;
-    --pink: #FFA9C7;
-    --lavender: #B39DDB;
-    --radius-lg: 28px;
-    --radius-md: 18px;
-    --radius-sm: 12px;
-    --shadow: 0 12px 30px -12px rgba(43, 58, 58, 0.18);
+    --paper: #FBF7EE;
+    --card: #FFFDF7;
+    --ink: #3A3126;
+    --ink-soft: #8A7D66;
+    --green: #4C7A57;
+    --green-deep: #2E5138;
+    --green-wash: #C7DFBE;
+    --green-wash-soft: #DCEBD4;
+    --sand: #E8D9AE;
+    --sand-tint: #F6EED4;
+    --clay: #D98F6B;
+    --clay-tint: #F4DECE;
+    --sky: #A9CBD6;
+    --sky-tint: #E4F0F2;
+    --moss: #7C9B6C;
+    --radius-blob: 42px 18px 40px 16px / 18px 38px 16px 40px;
+    --shadow: 0 14px 28px -16px rgba(46, 81, 56, 0.35);
   }
 
   * { box-sizing: border-box; }
@@ -36,7 +35,7 @@
   html, body {
     width: 100%;
     overflow-x: hidden;
-    background: var(--bg);
+    background: var(--paper);
     font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
     color: var(--ink);
     position: relative;
@@ -44,18 +43,20 @@
     padding: 0;
   }
 
-  .blob {
+  /* watercolor wash blobs */
+  .wash {
     position: fixed;
     border-radius: 50%;
-    filter: blur(2px);
-    opacity: 0.55;
+    filter: blur(18px);
+    opacity: 0.45;
     z-index: 0;
     pointer-events: none;
+    mix-blend-mode: multiply;
   }
-  .blob-1 { width: 220px; height: 220px; background: var(--pink); top: -80px; left: -70px; }
-  .blob-2 { width: 160px; height: 160px; background: var(--blue); top: 120px; right: -60px; }
-  .blob-3 { width: 180px; height: 180px; background: var(--yellow); bottom: 40px; left: -80px; }
-  .blob-4 { width: 140px; height: 140px; background: var(--lavender); bottom: -60px; right: -40px; }
+  .wash-1 { width: 260px; height: 260px; background: var(--green-wash); top: -90px; left: -80px; transform: rotate(8deg); }
+  .wash-2 { width: 180px; height: 180px; background: var(--sky); top: 140px; right: -70px; opacity: 0.35; }
+  .wash-3 { width: 220px; height: 220px; background: var(--sand); bottom: 60px; left: -90px; opacity: 0.4; }
+  .wash-4 { width: 160px; height: 160px; background: var(--clay-tint); bottom: -60px; right: -50px; opacity: 0.45; }
 
   .main-container {
     position: relative;
@@ -63,59 +64,82 @@
     max-width: 500px;
     width: 100%;
     margin: 0 auto;
-    padding: 28px 16px 60px;
+    padding: 30px 18px 60px;
   }
 
-  .header-block { text-align: center; margin-bottom: 22px; }
-  .header-block img {
-    width: 85%;
-    max-width: 280px;
-    height: auto;
-    display: block;
-    margin: 0 auto 12px;
+  .header-block { text-align: center; margin-bottom: 24px; position: relative; }
+  .header-block .badge-stamp {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: "Noto Sans TC", sans-serif;
+    font-weight: 700;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    color: var(--green-deep);
+    background: var(--green-wash-soft);
+    padding: 5px 14px;
+    border-radius: 999px;
+    margin-bottom: 10px;
   }
   .header-block h4 {
+    font-family: "Noto Serif TC", serif;
     font-weight: 900;
-    font-size: 1.35rem;
-    margin: 0 0 4px;
-    color: var(--ink);
+    font-size: 1.7rem;
+    margin: 0 0 6px;
+    color: var(--green-deep);
+    line-height: 1.35;
   }
   .header-block .sub {
-    font-family: "Baloo 2", sans-serif;
     font-weight: 500;
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     color: var(--ink-soft);
+    letter-spacing: 0.02em;
   }
 
   .card {
     background: var(--card);
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-blob);
     box-shadow: var(--shadow);
-    border: none;
-    padding: 22px 20px;
-    margin-bottom: 18px;
+    border: 1.5px solid var(--green-wash);
+    padding: 24px 20px;
+    margin-bottom: 20px;
+    position: relative;
+  }
+  .card::before {
+    content: "";
+    position: absolute;
+    top: -10px;
+    left: 28px;
+    width: 34px;
+    height: 20px;
+    background: var(--sand-tint);
+    opacity: 0.8;
+    border-radius: 50% 50% 40% 40%;
+    transform: rotate(-4deg);
   }
 
   .step-eyebrow {
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-family: "Baloo 2", sans-serif;
+    gap: 10px;
     font-weight: 700;
-    font-size: 0.8rem;
-    color: var(--primary-dark);
-    margin-bottom: 14px;
+    font-size: 0.95rem;
+    color: var(--green-deep);
+    margin-bottom: 16px;
   }
   .step-eyebrow .num {
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background: var(--primary-tint);
-    color: var(--primary-dark);
+    width: 30px;
+    height: 30px;
+    border-radius: 60% 40% 55% 45% / 45% 55% 40% 60%;
+    background: var(--green);
+    color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.75rem;
+    font-family: "Noto Serif TC", serif;
+    font-weight: 700;
+    font-size: 0.95rem;
     flex-shrink: 0;
   }
 
@@ -131,16 +155,16 @@
     width: 100%;
     appearance: none;
     -webkit-appearance: none;
-    background: var(--bg) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'><path d='M1 1L7 7L13 1' stroke='%232B3A3A' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>") no-repeat right 16px center;
-    border: 2px solid transparent;
-    border-radius: var(--radius-sm);
+    background: var(--sand-tint) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'><path d='M1 1L7 7L13 1' stroke='%232E5138' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>") no-repeat right 16px center;
+    border: 2px solid var(--green-wash);
+    border-radius: 16px;
     padding: 13px 40px 13px 16px;
     font-size: 1rem;
     font-family: inherit;
     color: var(--ink);
     margin-bottom: 16px;
   }
-  select.form-select:disabled { opacity: 0.55; }
+  select.form-select:disabled { opacity: 0.5; }
 
   #studentList { display: flex; flex-direction: column; gap: 10px; }
 
@@ -149,24 +173,26 @@
     justify-content: space-between;
     align-items: center;
     gap: 10px;
-    background: var(--bg);
-    border-radius: var(--radius-md);
-    padding: 12px 14px;
+    background: var(--green-wash-soft);
+    border-radius: 40% 12% 38% 14% / 14% 40% 12% 38%;
+    padding: 12px 16px;
   }
 
-  #studentList .badge {
-    display: inline-block;
-    background: var(--primary-tint);
-    color: var(--primary-dark);
-    font-family: "Baloo 2", sans-serif;
+  #studentList .roll-id {
     font-weight: 700;
-    font-size: 0.75rem;
-    padding: 3px 9px;
-    border-radius: 999px;
-    margin-bottom: 4px;
+    font-size: 1.06rem;
+    color: var(--ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
-
-  #studentList .fw-bold { font-weight: 700; font-size: 1.1rem; }
+  #studentList .roll-id .seat {
+    font-family: "Noto Serif TC", serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--clay);
+    margin-right: 8px;
+  }
 
   .status-btn-group {
     display: inline-flex;
@@ -174,7 +200,8 @@
     border-radius: 999px;
     padding: 3px;
     gap: 2px;
-    box-shadow: inset 0 0 0 1.5px #E7EEE7;
+    box-shadow: inset 0 0 0 1.5px var(--green-wash);
+    flex-shrink: 0;
   }
   .status-btn-group input[type="radio"] { display: none; }
   .status-btn-group label {
@@ -186,37 +213,39 @@
     color: var(--ink-soft);
     transition: all 0.15s ease;
   }
-  .status-btn-group input[value="出席"]:checked + label { background: var(--primary); color: #fff; }
-  .status-btn-group input[value="請假"]:checked + label { background: var(--yellow); color: #5A4200; }
-  .status-btn-group input[value="缺席"]:checked + label { background: var(--coral); color: #fff; }
+  .status-btn-group input[value="出席"]:checked + label { background: var(--green); color: #fff; }
+  .status-btn-group input[value="請假"]:checked + label { background: var(--sand); color: #5A4200; }
+  .status-btn-group input[value="缺席"]:checked + label { background: var(--clay); color: #fff; }
 
   button {
     font-family: inherit;
     border: none;
     cursor: pointer;
     font-weight: 700;
-    border-radius: var(--radius-sm);
+    border-radius: 16px;
     transition: transform 0.1s ease;
   }
   button:active { transform: scale(0.97); }
 
   .btn-primary {
     width: 100%;
-    background: var(--primary);
+    background: var(--green-deep);
     color: #fff;
     padding: 14px 16px;
     font-size: 1rem;
-    box-shadow: 0 8px 18px -6px rgba(69, 182, 110, 0.55);
+    font-family: "Noto Serif TC", serif;
+    letter-spacing: 0.02em;
+    box-shadow: 0 8px 18px -6px rgba(46, 81, 56, 0.5);
   }
-  
+
   .btn-outline {
     width: 100%;
-    background: #fff;
-    border: 2px dashed var(--primary);
-    color: var(--primary-dark);
+    background: var(--sand-tint);
+    border: 2px dashed var(--clay);
+    color: var(--green-deep);
     padding: 16px;
     font-size: 1rem;
-    border-radius: var(--radius-md);
+    border-radius: 36px 12px 34px 12px / 12px 34px 12px 36px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -224,17 +253,17 @@
   }
 
   .btn-secondary {
-    background: var(--bg);
-    color: var(--ink-soft);
+    background: var(--green-wash-soft);
+    color: var(--green-deep);
     padding: 12px 20px;
     font-size: 0.9rem;
   }
 
   .signature-preview-box {
-    border: 2px solid var(--primary-tint);
-    border-radius: var(--radius-md);
+    border: 2px solid var(--green-wash);
+    border-radius: 20px;
     padding: 12px;
-    background: #FAFDFB;
+    background: #FEFCF6;
     text-align: center;
     margin-bottom: 16px;
   }
@@ -247,7 +276,7 @@
   .modal-overlay {
     position: fixed;
     top: 0; left: 0; width: 100vw; height: 100vh;
-    background: rgba(43, 58, 58, 0.6);
+    background: rgba(46, 81, 56, 0.5);
     backdrop-filter: blur(4px);
     z-index: 9999;
     display: none;
@@ -258,12 +287,13 @@
   .modal-overlay.active { display: flex; }
 
   .modal-card {
-    background: #fff;
+    background: var(--paper);
     width: 100%;
     max-width: 600px;
-    border-radius: var(--radius-lg);
+    border-radius: 30px;
     padding: 20px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.22);
+    border: 1.5px solid var(--green-wash);
     display: flex;
     flex-direction: column;
     gap: 14px;
@@ -274,13 +304,19 @@
     justify-content: space-between;
     align-items: center;
   }
-  .modal-header h3 { margin: 0; font-size: 1.1rem; color: var(--ink); }
+  .modal-header h3 {
+    margin: 0;
+    font-size: 1.15rem;
+    color: var(--green-deep);
+    font-family: "Noto Serif TC", serif;
+    font-weight: 700;
+  }
 
   #modal-canvas-container {
     width: 100%;
     height: 300px;
-    border: 2.5px dashed #CFE3D3;
-    border-radius: var(--radius-md);
+    border: 2.5px dashed var(--green-wash);
+    border-radius: 20px;
     background: #fff;
     touch-action: none;
   }
@@ -298,16 +334,16 @@
 </head>
 <body>
 
-  <div class="blob blob-1"></div>
-  <div class="blob blob-2"></div>
-  <div class="blob blob-3"></div>
-  <div class="blob blob-4"></div>
+  <div class="wash wash-1"></div>
+  <div class="wash wash-2"></div>
+  <div class="wash wash-3"></div>
+  <div class="wash wash-4"></div>
 
   <div class="main-container">
     <div class="header-block">
-      <img src="logo.png" alt="福瑞斯特中小學 Logo" onerror="this.style.display='none'">
+      <span class="badge-stamp">🌿 FORESTRY SCHOOL CLUB</span>
       <h4>115-1 社團線上點名系統</h4>
-      <div class="sub">Forestry School Club Rollcall</div>
+      <div class="sub">福瑞斯特中小學</div>
     </div>
 
     <!-- 步驟 1: 選擇社團 -->
@@ -338,7 +374,7 @@
       <div class="step-eyebrow"><span class="num">3</span>指導老師簽名確認</div>
       
       <button id="openSignatureBtn" class="btn-outline" onclick="openSignatureModal()">
-        ✍️ 點此開啟大畫布手寫簽名
+        🖋️ 點此開啟大畫布手寫簽名
       </button>
 
       <div id="signaturePreview" class="signature-preview-box" style="display: none;">
@@ -357,7 +393,7 @@
   <div id="signatureModal" class="modal-overlay">
     <div class="modal-card">
       <div class="modal-header">
-        <h3>✍️ 請指導老師親筆簽名</h3>
+        <h3>🖋️ 請指導老師親筆簽名</h3>
         <span style="font-size: 0.8rem; color: var(--ink-soft);">（請在大框內手寫）</span>
       </div>
       
@@ -382,7 +418,7 @@
       const canvas = document.getElementById('modal-signature-pad');
       modalSignaturePad = new SignaturePad(canvas, {
         backgroundColor: 'rgb(255, 255, 255)',
-        penColor: 'rgb(0, 0, 0)'
+        penColor: 'rgb(46, 81, 56)'
       });
 
       window.addEventListener("resize", resizeModalCanvas);
@@ -478,17 +514,16 @@
         .then(students => {
           studentListDiv.innerHTML = "";
           if (!students || students.length === 0) {
-            studentListDiv.innerHTML = '<div style="background: var(--yellow-tint); color: #8A6200; border-radius: 12px; padding: 14px; text-align: center;">此社團目前沒有學生資料。</div>';
+            studentListDiv.innerHTML = '<div style="background: var(--sand-tint); color: #8A6200; border-radius: 16px; padding: 14px; text-align: center;">此社團目前沒有學生資料。</div>';
             return;
           }
 
-          // 核心修正重點：標籤顯示座號 s.seat，下方大字顯示姓名 s.name
+          // 座號與姓名合併顯示於同一行，例如：30102 吳奕霖
           students.forEach((s, idx) => {
             studentListDiv.innerHTML += `
               <div data-seat="${s.seat}">
-                <div style="min-width: 0;">
-                  <span class="badge">座號：${s.seat}</span>
-                  <div class="fw-bold">${s.name}</div>
+                <div class="roll-id" style="min-width: 0;">
+                  <span class="seat">${s.seat}</span>${s.name}
                 </div>
                 <div class="status-btn-group flex-shrink-0">
                   <input type="radio" id="p_${idx}_1" name="st_${idx}" value="出席" checked>
@@ -505,7 +540,7 @@
           document.getElementById("signatureSection").style.display = "block";
         })
         .catch(err => {
-          studentListDiv.innerHTML = '<div style="color:red; text-align:center;">載入學生名單失敗，請確認網路連線。</div>';
+          studentListDiv.innerHTML = '<div style="color: var(--clay); text-align:center;">載入學生名單失敗，請確認網路連線。</div>';
         });
     }
 
@@ -526,9 +561,10 @@
 
       studentRows.forEach((row, idx) => {
         const seat = row.getAttribute("data-seat");
-        const nameNode = row.querySelector(".fw-bold");
-        if (nameNode) {
-          const name = nameNode.innerText;
+        const rollIdNode = row.querySelector(".roll-id");
+        if (rollIdNode) {
+          const seatSpan = rollIdNode.querySelector(".seat");
+          const name = rollIdNode.textContent.replace(seatSpan ? seatSpan.textContent : "", "").trim();
           const status = row.querySelector(`input[name="st_${idx}"]:checked`).value;
           records.push({ seat: seat, name: name, status: status });
         }
