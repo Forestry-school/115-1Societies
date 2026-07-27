@@ -44,7 +44,6 @@
     padding: 0;
   }
 
-  /* 背景圓形色塊裝飾 */
   .blob {
     position: fixed;
     border-radius: 50%;
@@ -67,7 +66,6 @@
     padding: 28px 16px 60px;
   }
 
-  /* 標頭 */
   .header-block { text-align: center; margin-bottom: 22px; }
   .header-block img {
     width: 85%;
@@ -144,7 +142,6 @@
   }
   select.form-select:disabled { opacity: 0.55; }
 
-  /* 學生清單 */
   #studentList { display: flex; flex-direction: column; gap: 10px; }
 
   #studentList > div {
@@ -193,7 +190,6 @@
   .status-btn-group input[value="請假"]:checked + label { background: var(--yellow); color: #5A4200; }
   .status-btn-group input[value="缺席"]:checked + label { background: var(--coral); color: #fff; }
 
-  /* 按鈕樣式 */
   button {
     font-family: inherit;
     border: none;
@@ -234,7 +230,6 @@
     font-size: 0.9rem;
   }
 
-  /* 簽名預覽 */
   .signature-preview-box {
     border: 2px solid var(--primary-tint);
     border-radius: var(--radius-md);
@@ -249,7 +244,6 @@
     object-fit: contain;
   }
 
-  /* 獨立簽名視窗 (Modal) */
   .modal-overlay {
     position: fixed;
     top: 0; left: 0; width: 100vw; height: 100vh;
@@ -511,7 +505,7 @@
         });
     }
 
-    // 發送精準對應的 8 個欄位資料
+    // 前端僅傳送社團、簽名檔與學生名單
     function submitRollcall() {
       if (!signatureDataURL) {
         alert("請指導老師完成親筆簽名後再送出！");
@@ -534,24 +528,12 @@
         records.push({ seat: seat, name: name, status: status });
       });
 
-      const now = new Date();
-      // 取得日期 (格式: YYYY/MM/DD)
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const day = String(now.getDate()).padStart(2, '0');
-      const currentDate = `${year}/${month}/${day}`;
-
-      // 取得時間 (格式: HH:mm:ss)
-      const currentTime = now.toTimeString().split(' ')[0];
-
       const payload = {
         action: "saveRollcall",
-        clubId: clubId,        // 社團ID
-        clubName: clubName,    // 社團名稱
-        date: currentDate,     // 日期
-        time: currentTime,     // 點名時間
-        signature: signatureDataURL, // 簽名檔
-        records: records       // 學生名單 (含座號、姓名、出席狀態)
+        clubId: clubId,
+        clubName: clubName,
+        signature: signatureDataURL,
+        records: records
       };
 
       fetch(GAS_WEB_APP_URL, {
