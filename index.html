@@ -75,8 +75,8 @@
   </div>
 
   <script>
-    // ⚠️ 請替換為您在 Apps Script 部署取得的「網路應用程式 URL」
-    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/YOUR_GAS_DEPLOYMENT_ID/exec";
+    // 已自動填入您的 Apps Script Web App URL
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz2hL5IREZFWhJiwMwSLcMkMP1oPPczBOZLmMpKfYDnrXxzdhuHlGYpvON7zKlQ23BD/exec";
 
     let signaturePad;
 
@@ -112,7 +112,7 @@
       fetch(`${GAS_WEB_APP_URL}?action=getClubs&category=${encodeURIComponent(category)}`)
         .then(res => res.json())
         .then(clubs => {
-          clubSelect.innerHTML = '<option value="">-- 請選擇社团 --</option>';
+          clubSelect.innerHTML = '<option value="">-- 請選擇社團 --</option>';
           clubs.forEach(c => {
             clubSelect.innerHTML += `<option value="${c.id}">${c.name} (${c.id})</option>`;
           });
@@ -198,7 +198,6 @@
         records: records
       };
 
-      // 發送至 GAS
       fetch(GAS_WEB_APP_URL, {
         method: "POST",
         body: JSON.stringify(payload)
