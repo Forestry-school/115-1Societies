@@ -218,7 +218,7 @@
 
   <div class="container">
     <div class="header">
-      <h2>🌿 115-1 社團線上點名系統</h2>
+      <h2>🌿 福瑞斯特中小學 社團點名系統</h2>
     </div>
 
     <!-- 1. 選擇學段與社團 -->
@@ -271,8 +271,8 @@
   </div>
 
   <script>
-    // ⚠️ 請填入您的 Google Apps Script 部署 URL 網址
-    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec"; 
+    // 🔗 已幫您填入貼上的 Web App 網址
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwVO9UVWa8MtWvszbvrAYI4vxkJpZIQWIey-JWlx7Rh_M9GZDvhcP8W7njcG7O4MtUs/exec"; 
 
     let studentDataCache = [];
     let finalSignatureBase64 = "";
@@ -294,13 +294,17 @@
         .then(res => res.json())
         .then(categories => {
           select.innerHTML = '<option value="">-- 請選擇學段 --</option>';
+          if (categories.length === 0) {
+            select.innerHTML = '<option value="">(查無學段資料，請檢查試算表)</option>';
+            return;
+          }
           categories.forEach(cat => {
             select.innerHTML += `<option value="${cat}">${cat}</option>`;
           });
         })
         .catch(err => {
           console.error(err);
-          select.innerHTML = '<option value="">-- 載入失敗，請重新整理 --</option>';
+          select.innerHTML = '<option value="">-- 載入失敗，請確認 GAS 部署為【新版本】與【所有人】 --</option>';
         });
     }
 
