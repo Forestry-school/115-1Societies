@@ -361,10 +361,7 @@
       <div class="step-eyebrow"><span class="num">1</span>選擇社團</div>
       <label class="form-label">選擇學段 / 時間</label>
       <select id="categorySelect" class="form-select" onchange="filterClubs()">
-        <option value="">-- 請選擇學段 --</option>
-        <option value="國小低年級">國小低年級（星期二）</option>
-        <option value="國小中高年級">國小中高年級（星期二）</option>
-        <option value="國中">國中（星期三）</option>
+        <option value="">-- 載入學段列表中... --</option>
       </select>
 
       <label class="form-label">選擇社團</label>
@@ -419,7 +416,6 @@
   </div>
 
   <script>
-    // 已自動替換為您最新的 Google Apps Script 部署網址
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwVO9UVWa8MtWvszbvrAYI4vxkJpZIQWIey-JWlx7Rh_M9GZDvhcP8W7njcG7O4MtUs/exec";
 
     let modalSignaturePad;
@@ -433,7 +429,25 @@
       });
 
       window.addEventListener("resize", resizeModalCanvas);
+      
+      // 🚀 開頁自動載入「試算表」內所有的不重複類別選項
+      loadCategories();
     };
+
+    function loadCategories() {
+      const categorySelect = document.getElementById("categorySelect");
+      fetch(`${GAS_WEB_APP_URL}?action=getCategories`)
+        .then(res => res.json())
+        .then(categories => {
+          categorySelect.innerHTML = '<option value="">-- 請選擇學段 / 時間 --</option>';
+          categories.forEach(cat => {
+            categorySelect.innerHTML += `<option value="${cat}">${cat}</option>`;
+          });
+        })
+        .catch(err => {
+          categorySelect.innerHTML = '<option value="">-- 載入失敗，請重試 --</option>';
+        });
+    }
 
     function openSignatureModal() {
       document.getElementById('signatureModal').classList.add('active');
