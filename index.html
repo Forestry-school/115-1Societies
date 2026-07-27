@@ -2,7 +2,6 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<!-- 防止使用者手勢縮放 -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>福瑞斯特中小學 - 115-1 社團點名系統</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -44,7 +43,6 @@
     padding: 0;
   }
 
-  /* 全螢幕彈窗開啟時，背景完全禁止滾動 */
   body.modal-open {
     overflow: hidden !important;
     position: fixed;
@@ -52,7 +50,6 @@
     height: 100%;
   }
 
-  /* watercolor wash blobs */
   .wash {
     position: fixed;
     border-radius: 50%;
@@ -166,6 +163,21 @@
   }
   select.form-select:disabled { opacity: 0.5; }
 
+  /* 提示標籤 */
+  .edit-notice {
+    background: #FFF4E5;
+    border: 1.5px solid #FFE0B2;
+    color: #B78103;
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
   #studentList { display: flex; flex-direction: column; gap: 10px; }
 
   #studentList > div {
@@ -273,9 +285,7 @@
     object-fit: contain;
   }
 
-  /* ==========================================
-     🔒 徹底固定！絕對不滾動的全螢幕 Modal CSS 
-     ========================================== */
+  /* 全螢幕 Modal */
   .modal-overlay {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
@@ -287,8 +297,8 @@
     flex-direction: column;
     padding: 0;
     margin: 0;
-    overflow: hidden; /* 防止視窗滾動 */
-    touch-action: none; /* 禁用預設觸控滑動 */
+    overflow: hidden;
+    touch-action: none;
   }
   .modal-overlay.active { display: flex; }
 
@@ -319,14 +329,14 @@
   }
 
   #modal-canvas-container {
-    flex: 1; /* 彈性拉滿畫面中間 */
+    flex: 1;
     width: 100%;
     border: 2.5px dashed var(--green-wash);
     border-radius: 20px;
     background: #fff;
     position: relative;
     overflow: hidden;
-    touch-action: none; /* 關閉畫布的滑動 */
+    touch-action: none;
   }
   
   #modal-signature-pad {
@@ -340,7 +350,7 @@
     display: flex;
     gap: 12px;
     flex-shrink: 0;
-    padding-bottom: env(safe-area-inset-bottom, 8px); /* 避開 iPhone 下方橫條 */
+    padding-bottom: env(safe-area-inset-bottom, 8px);
   }
   .modal-actions button { flex: 1; padding: 14px; font-size: 1rem; }
 </style>
@@ -375,7 +385,10 @@
 
     <!-- 步驟 2: 學生點名 -->
     <div id="rollcallSection" class="card" style="display: none;">
-      <div class="step-eyebrow"><span class="num">2</span>學生點名（預設全員出席）</div>
+      <div class="step-eyebrow"><span class="num">2</span>學生點名</div>
+      <div id="editNotice" class="edit-notice" style="display: none;">
+        ✏️ 提示：今日已有點名紀錄，以下為剛才勾選的結果，您可以直接更正！
+      </div>
       <div id="studentList"></div>
     </div>
 
@@ -395,11 +408,11 @@
         </div>
       </div>
 
-      <button class="btn-primary" style="margin-top: 16px;" onclick="submitRollcall()">確認送出點名</button>
+      <button id="submitBtn" class="btn-primary" style="margin-top: 16px;" onclick="submitRollcall()">確認送出點名</button>
     </div>
   </div>
 
-  <!-- 固定全螢幕手寫簽名視窗 (Modal) -->
+  <!-- 固定全螢幕手寫簽名視窗 -->
   <div id="signatureModal" class="modal-overlay">
     <div class="modal-card">
       <div class="modal-header">
@@ -431,7 +444,6 @@
         penColor: 'rgb(46, 81, 56)'
       });
 
-      // 🔒 阻止iOS/Android手寫時帶動螢幕滾動的關鍵事件
       canvas.addEventListener("touchstart", preventScroll, { passive: false });
       canvas.addEventListener("touchmove", preventScroll, { passive: false });
 
@@ -546,30 +558,59 @@
       if (!clubId) return;
 
       const studentListDiv = document.getElementById("studentList");
-      studentListDiv.innerHTML = '<div style="text-align:center; padding: 12px 0; color: var(--ink-soft);">正在載入學生名單...</div>';
+      const editNotice = document.getElementById("editNotice");
+      const submitBtn = document.getElementById("submitBtn");
+
+      studentListDiv.innerHTML = '<div style="text-align:center; padding: 12px 0; color: var(--ink-soft);">正在載入學生名單與紀錄...</div>';
       document.getElementById("rollcallSection").style.display = "block";
 
       fetch(`${GAS_WEB_APP_URL}?action=getStudents&clubId=${encodeURIComponent(clubId)}`)
         .then(res => res.json())
-        .then(students => {
+        .then(data => {
           studentListDiv.innerHTML = "";
-          if (!students || students.length === 0) {
+          const students = data.students || [];
+          const existingRecords = data.existingRecords || {};
+          const existingSignature = data.existingSignature || "";
+
+          if (students.length === 0) {
             studentListDiv.innerHTML = '<div style="background: var(--sand-tint); color: #8A6200; border-radius: 16px; padding: 14px; text-align: center;">此社團目前沒有學生資料。</div>';
             return;
           }
 
+          // 判斷今日是否已點過名
+          const hasRecord = Object.keys(existingRecords).length > 0;
+          if (hasRecord) {
+            editNotice.style.display = "flex";
+            submitBtn.textContent = "更新並送出修正紀錄";
+            if (existingSignature) {
+              signatureDataURL = existingSignature;
+              document.getElementById('openSignatureBtn').style.display = 'none';
+              document.getElementById('signaturePreview').style.display = 'block';
+              document.getElementById('previewImg').src = signatureDataURL;
+            }
+          } else {
+            editNotice.style.display = "none";
+            submitBtn.textContent = "確認送出點名";
+            signatureDataURL = "";
+            document.getElementById('openSignatureBtn').style.display = 'flex';
+            document.getElementById('signaturePreview').style.display = 'none';
+          }
+
           students.forEach((s, idx) => {
+            // 如果今天已點過名，帶入點過的值；若沒點過，預設「出席」
+            const currentStatus = existingRecords[s.seat] || "出席";
+
             studentListDiv.innerHTML += `
               <div data-seat="${s.seat}">
                 <div class="roll-id" style="min-width: 0;">
                   <span class="seat">${s.seat}</span>${s.name}
                 </div>
                 <div class="status-btn-group flex-shrink-0">
-                  <input type="radio" id="p_${idx}_1" name="st_${idx}" value="出席" checked>
+                  <input type="radio" id="p_${idx}_1" name="st_${idx}" value="出席" ${currentStatus === "出席" ? "checked" : ""}>
                   <label for="p_${idx}_1">出席</label>
-                  <input type="radio" id="p_${idx}_2" name="st_${idx}" value="請假">
+                  <input type="radio" id="p_${idx}_2" name="st_${idx}" value="請假" ${currentStatus === "請假" ? "checked" : ""}>
                   <label for="p_${idx}_2">請假</label>
-                  <input type="radio" id="p_${idx}_3" name="st_${idx}" value="缺席">
+                  <input type="radio" id="p_${idx}_3" name="st_${idx}" value="缺席" ${currentStatus === "缺席" ? "checked" : ""}>
                   <label for="p_${idx}_3">缺席</label>
                 </div>
               </div>
@@ -623,11 +664,11 @@
       })
       .then(res => res.json())
       .then(data => {
-        alert("點名完成！紀錄已順利存入系統。");
+        alert("紀錄更新完成！");
         location.reload();
       })
       .catch(err => {
-        alert("點名完成！紀錄已順利存入系統。");
+        alert("紀錄更新完成！");
         location.reload();
       });
     }
