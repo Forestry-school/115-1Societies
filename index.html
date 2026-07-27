@@ -69,12 +69,11 @@
   /* 校徽與標頭 */
   .header-block { text-align: center; margin-bottom: 22px; }
   .header-block img {
-    max-width: 88px;
-    height: auto;
+width: 85%;            /* 手機版佔據上方容器的 85% 寬度 */
+    max-width: 280px;      /* 電腦版或大螢幕最多放大到 280px */
+    height: auto;          /* 等比例高度 */
     display: block;
-    margin: 0 auto 10px;
-    border-radius: 20px;
-    box-shadow: var(--shadow-sm);
+    margin: 0 auto 12px;
   }
   .header-block h4 {
     font-family: "Noto Sans TC", sans-serif;
