@@ -1,117 +1,325 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <!-- 防止手機使用者縮放導致畫面跑版 -->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>福瑞斯特中小學 - 115-1 社團點名系統</title>
-  <!-- Bootstrap 5 CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Signature Pad 手寫簽名套件 -->
-  <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
-  <style>
-    /* 全域防跑版設定 */
-    * { box-sizing: border-box; }
-    html, body {
-      width: 100%;
-      overflow-x: hidden; /* 徹底杜絕手機左右滑動跑版 */
-      background-color: #f4f6f9;
-      font-family: "Microsoft JhengHei", sans-serif;
-    }
-    
-    .main-container {
-      max-width: 500px; /* 電腦端維持精致寬度，手機端 100% 滿版 */
-      width: 100%;
-      margin: 0 auto;
-      padding: 15px;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>福瑞斯特中小學 - 115-1 社團點名系統</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<!-- Signature Pad 手寫簽名套件 -->
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #F4F9F1;
+    --card: #FFFFFF;
+    --ink: #2B3A3A;
+    --ink-soft: #6E7E7C;
+    --primary: #45B66E;
+    --primary-dark: #2F9A57;
+    --primary-tint: #E3F6E9;
+    --yellow: #FFC857;
+    --yellow-tint: #FFF4DC;
+    --coral: #FF7F6B;
+    --coral-tint: #FFE6E1;
+    --blue: #6FB1E8;
+    --pink: #FFA9C7;
+    --lavender: #B39DDB;
+    --radius-lg: 28px;
+    --radius-md: 18px;
+    --radius-sm: 12px;
+    --shadow: 0 12px 30px -12px rgba(43, 58, 58, 0.18);
+    --shadow-sm: 0 6px 16px -8px rgba(43, 58, 58, 0.15);
+  }
 
-    .card {
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-      border: none;
-    }
+  * { box-sizing: border-box; }
 
-    /* 點名按鈕響應式優化 */
-    .status-btn-group {
-      display: flex;
-      gap: 4px;
-    }
-    .status-btn-group input[type="radio"] { display: none; }
-    .status-btn-group label {
-      padding: 6px 10px;
-      border: 1px solid #ced4da;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.85rem;
-      font-weight: bold;
-      white-space: nowrap;
-    }
-    .status-btn-group input[value="出席"]:checked + label { background-color: #198754; color: white; border-color: #198754; }
-    .status-btn-group input[value="請假"]:checked + label { background-color: #ffc107; color: black; border-color: #ffc107; }
-    .status-btn-group input[value="缺席"]:checked + label { background-color: #dc3545; color: white; border-color: #dc3545; }
+  html, body {
+    width: 100%;
+    overflow-x: hidden; /* 徹底杜絕手機左右滑動跑版 */
+    background: var(--bg);
+    font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+    color: var(--ink);
+    position: relative;
+  }
 
-    /* 手寫板容器防超頁與防滑動 */
-    #canvas-container {
-      width: 100%;
-      border: 2px dashed #adb5bd;
-      border-radius: 8px;
-      background: #fff;
-      touch-action: none; /* 防止手機簽名時帶動網頁滾動 */
-    }
-    canvas {
-      width: 100% !important;
-      height: 160px !important;
-      display: block;
-    }
-  </style>
+  /* 背景四角柔和色塊裝飾 */
+  .blob {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(2px);
+    opacity: 0.55;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .blob-1 { width: 220px; height: 220px; background: var(--pink); top: -80px; left: -70px; }
+  .blob-2 { width: 160px; height: 160px; background: var(--blue); top: 120px; right: -60px; }
+  .blob-3 { width: 180px; height: 180px; background: var(--yellow); bottom: 40px; left: -80px; }
+  .blob-4 { width: 140px; height: 140px; background: var(--lavender); bottom: -60px; right: -40px; }
+
+  .main-container {
+    position: relative;
+    z-index: 1;
+    max-width: 500px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 28px 16px 60px;
+  }
+
+  /* 校徽與標頭 */
+  .header-block { text-align: center; margin-bottom: 22px; }
+  .header-block img {
+    max-width: 88px;
+    height: auto;
+    display: block;
+    margin: 0 auto 10px;
+    border-radius: 20px;
+    box-shadow: var(--shadow-sm);
+  }
+  .header-block h4 {
+    font-family: "Noto Sans TC", sans-serif;
+    font-weight: 900;
+    font-size: 1.35rem;
+    margin: 0 0 4px;
+    color: var(--ink);
+  }
+  .header-block .sub {
+    font-family: "Baloo 2", sans-serif;
+    font-weight: 500;
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+    letter-spacing: 0.03em;
+  }
+
+  .card {
+    background: var(--card);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    border: none;
+    padding: 22px 20px;
+    margin-bottom: 18px;
+  }
+
+  .step-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: "Baloo 2", sans-serif;
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: var(--primary-dark);
+    letter-spacing: 0.04em;
+    margin-bottom: 14px;
+  }
+  .step-eyebrow .num {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--primary-tint);
+    color: var(--primary-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+  }
+
+  .form-label {
+    display: block;
+    font-weight: 700;
+    font-size: 0.88rem;
+    margin: 0 0 8px;
+    color: var(--ink);
+  }
+
+  select.form-select {
+    width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+    background: var(--bg) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'><path d='M1 1L7 7L13 1' stroke='%232B3A3A' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>") no-repeat right 16px center;
+    border: 2px solid transparent;
+    border-radius: var(--radius-sm);
+    padding: 13px 40px 13px 16px;
+    font-size: 1rem;
+    font-family: inherit;
+    color: var(--ink);
+    margin-bottom: 16px;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+  }
+  select.form-select:last-of-type { margin-bottom: 0; }
+  select.form-select:focus { outline: none; border-color: var(--primary); background-color: #fff; }
+  select.form-select:disabled { opacity: 0.55; }
+
+  /* 學生點名列表 */
+  #studentList { display: flex; flex-direction: column; gap: 10px; }
+
+  #studentList > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    border-bottom: none !important;
+  }
+
+  #studentList .badge {
+    display: inline-block;
+    background: var(--primary-tint);
+    color: var(--primary-dark);
+    font-family: "Baloo 2", sans-serif;
+    font-weight: 700;
+    font-size: 0.7rem;
+    padding: 3px 9px;
+    border-radius: 999px;
+    margin-bottom: 4px;
+  }
+
+  #studentList .fw-bold {
+    font-weight: 700;
+    font-size: 1.02rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* 出席狀態圓角分段膠囊按鈕 */
+  .status-btn-group {
+    display: inline-flex;
+    background: #fff;
+    border-radius: 999px;
+    padding: 3px;
+    gap: 2px;
+    flex-shrink: 0;
+    box-shadow: inset 0 0 0 1.5px #E7EEE7;
+  }
+  .status-btn-group input[type="radio"] { display: none; }
+  .status-btn-group label {
+    padding: 7px 12px;
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--ink-soft);
+    white-space: nowrap;
+    transition: all 0.15s ease;
+  }
+  .status-btn-group input[value="出席"]:checked + label { background: var(--primary); color: #fff; }
+  .status-btn-group input[value="請假"]:checked + label { background: var(--yellow); color: #5A4200; }
+  .status-btn-group input[value="缺席"]:checked + label { background: var(--coral); color: #fff; }
+
+  .alert-warning {
+    background: var(--yellow-tint);
+    color: #8A6200;
+    border-radius: var(--radius-md);
+    padding: 14px;
+    font-size: 0.9rem;
+    text-align: center;
+  }
+
+  .text-muted, .loading-note { color: var(--ink-soft) !important; }
+
+  /* 簽名板 */
+  #canvas-container {
+    width: 100%;
+    border: 2.5px dashed #CFE3D3;
+    border-radius: var(--radius-md);
+    background: #fff;
+    touch-action: none;
+    overflow: hidden;
+  }
+  canvas {
+    width: 100% !important;
+    height: 160px !important;
+    display: block;
+    touch-action: none;
+  }
+
+  /* 按鈕 */
+  button {
+    font-family: "Noto Sans TC", sans-serif;
+    border: none;
+    cursor: pointer;
+    font-weight: 700;
+    border-radius: var(--radius-sm);
+    transition: transform 0.1s ease, box-shadow 0.1s ease, opacity 0.1s ease;
+  }
+  button:active { transform: scale(0.97); }
+
+  .btn-outline-secondary {
+    background: var(--bg);
+    color: var(--ink-soft);
+    padding: 10px 16px;
+    font-size: 0.85rem;
+  }
+
+  .btn-primary {
+    width: 100%;
+    background: var(--primary);
+    color: #fff;
+    padding: 14px 16px;
+    font-size: 1rem;
+    box-shadow: 0 8px 18px -6px rgba(69, 182, 110, 0.55);
+  }
+  .btn-primary:hover { background: var(--primary-dark); }
+
+  small.text-muted {
+    font-family: "Baloo 2", sans-serif;
+    font-size: 0.75rem;
+  }
+</style>
 </head>
 <body>
 
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+  <div class="blob blob-4"></div>
+
   <div class="main-container">
-    <!-- 校徽與標頭區塊（已修復圖片超出問題） -->
-    <div class="text-center mb-3">
-      <img src="logo.jpg" alt="福瑞斯特中小學 Logo" style="max-width: 100%; height: auto; display: block; margin: 0 auto;" class="mb-2" onerror="this.style.display='none'">
-      <h4 class="fw-bold text-primary mb-0">115-1 社團線上點名系統</h4>
+    <!-- 校徽與標頭區塊 -->
+    <div class="header-block">
+      <img src="logo.jpg" alt="福瑞斯特中小學 Logo" onerror="this.style.display='none'">
+      <h4>115-1 社團線上點名系統</h4>
+      <div class="sub">Forestry School Club Rollcall</div>
     </div>
 
     <!-- 步驟 1: 選擇學段與社團 -->
-    <div class="card p-3 mb-3">
-      <div class="mb-3">
-        <label class="form-label fw-bold">1. 選擇學段 / 時間</label>
-        <select id="categorySelect" class="form-select form-select-lg" onchange="filterClubs()">
-          <option value="">-- 請選擇學段 --</option>
-          <option value="國小低年級">國小低年級（星期二）</option>
-          <option value="國小中高年級">國小中高年級（星期二）</option>
-          <option value="國中">國中（星期三）</option>
-        </select>
-      </div>
+    <div class="card">
+      <div class="step-eyebrow"><span class="num">1</span>選擇社團</div>
+      <label class="form-label">選擇學段 / 時間</label>
+      <select id="categorySelect" class="form-select" onchange="filterClubs()">
+        <option value="">-- 請選擇學段 --</option>
+        <option value="國小低年級">國小低年級（星期二）</option>
+        <option value="國小中高年級">國小中高年級（星期二）</option>
+        <option value="國中">國中（星期三）</option>
+      </select>
 
-      <div>
-        <label class="form-label fw-bold">2. 選擇社團</label>
-        <select id="clubSelect" class="form-select form-select-lg" onchange="loadStudents()" disabled>
-          <option value="">-- 請先選擇學段 --</option>
-        </select>
-      </div>
+      <label class="form-label">選擇社團</label>
+      <select id="clubSelect" class="form-select" onchange="loadStudents()" disabled>
+        <option value="">-- 請先選擇學段 --</option>
+      </select>
     </div>
 
     <!-- 步驟 2: 學生點名清單 -->
-    <div id="rollcallSection" class="card p-3 mb-3" style="display: none;">
-      <h6 class="fw-bold mb-3 text-secondary">3. 學生點名 (預設全員出席)</h6>
+    <div id="rollcallSection" class="card" style="display: none;">
+      <div class="step-eyebrow"><span class="num">2</span>學生點名（預設全員出席）</div>
       <div id="studentList"></div>
     </div>
 
     <!-- 步驟 3: 指導老師親筆簽名 -->
-    <div id="signatureSection" class="card p-3 mb-3" style="display: none;">
-      <h6 class="fw-bold mb-2 text-secondary">4. 指導老師簽名確認</h6>
+    <div id="signatureSection" class="card" style="display: none;">
+      <div class="step-eyebrow"><span class="num">3</span>指導老師簽名確認</div>
       <div id="canvas-container" class="mb-2">
         <canvas id="signature-pad"></canvas>
       </div>
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <button class="btn btn-sm btn-outline-secondary" onclick="clearSignature()">重新簽名</button>
+      <div class="d-flex justify-content-between align-items-center" style="display:flex; justify-content:space-between; align-items:center; margin: 10px 0 16px;">
+        <button class="btn-outline-secondary" onclick="clearSignature()">重新簽名</button>
         <small class="text-muted">請在上方畫布手寫簽名</small>
       </div>
-      <button class="btn btn-primary btn-lg w-100 fw-bold" onclick="submitRollcall()">確認送出點名</button>
+      <button class="btn-primary" onclick="submitRollcall()">確認送出點名</button>
     </div>
   </div>
 
@@ -127,9 +335,9 @@
         backgroundColor: 'rgb(255, 255, 255)',
         penColor: 'rgb(0, 0, 0)'
       });
-      
+
       resizeCanvas(true);
-      
+
       // 只有在螢幕寬度真正改變時才重繪，避免手機上下滾動觸發 resize
       window.addEventListener("resize", () => {
         if (canvas.offsetWidth !== lastCanvasWidth) {
@@ -145,7 +353,7 @@
 
       lastCanvasWidth = canvas.offsetWidth;
       const ratio = Math.max(window.devicePixelRatio || 1, 1);
-      
+
       let data = null;
       if (!forceClear && signaturePad && !signaturePad.isEmpty()) {
         data = signaturePad.toData();
@@ -166,7 +374,7 @@
     function filterClubs() {
       const category = document.getElementById("categorySelect").value;
       const clubSelect = document.getElementById("clubSelect");
-      
+
       if (!category) {
         clubSelect.innerHTML = '<option value="">-- 請先選擇學段 --</option>';
         clubSelect.disabled = true;
@@ -196,7 +404,7 @@
       if (!clubId) return;
 
       const studentListDiv = document.getElementById("studentList");
-      studentListDiv.innerHTML = '<div class="text-center py-3 text-muted">正在載入學生名單...</div>';
+      studentListDiv.innerHTML = '<div class="loading-note text-center py-3" style="text-align:center; padding: 12px 0;">正在載入學生名單...</div>';
       document.getElementById("rollcallSection").style.display = "block";
 
       fetch(`${GAS_WEB_APP_URL}?action=getStudents&clubId=${encodeURIComponent(clubId)}`)
@@ -204,16 +412,16 @@
         .then(students => {
           studentListDiv.innerHTML = "";
           if (students.length === 0) {
-            studentListDiv.innerHTML = '<div class="alert alert-warning m-0">此社團目前沒有學生資料。</div>';
+            studentListDiv.innerHTML = '<div class="alert-warning">此社團目前沒有學生資料。</div>';
             return;
           }
 
           students.forEach((s, idx) => {
             studentListDiv.innerHTML += `
-              <div class="d-flex justify-content-between align-items-center border-bottom py-2" data-seat="${s.seat}">
-                <div class="me-2" style="min-width: 0;">
-                  <span class="badge bg-secondary mb-1" style="font-size:0.75rem;">${s.seat}</span>
-                  <div class="fw-bold text-truncate" style="font-size: 1.05rem;">${s.name}</div>
+              <div data-seat="${s.seat}">
+                <div style="min-width: 0;">
+                  <span class="badge">${s.seat}</span>
+                  <div class="fw-bold">${s.name}</div>
                 </div>
                 <div class="status-btn-group flex-shrink-0">
                   <input type="radio" id="p_${idx}_1" name="st_${idx}" value="出席" checked>
@@ -226,18 +434,18 @@
               </div>
             `;
           });
-          
+
           document.getElementById("signatureSection").style.display = "block";
-          
+
           setTimeout(() => {
             resizeCanvas(false);
           }, 200);
         });
     }
 
-    function clearSignature() { 
+    function clearSignature() {
       if (signaturePad) {
-        signaturePad.clear(); 
+        signaturePad.clear();
       }
     }
 
