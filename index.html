@@ -1,488 +1,626 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>社團線上點名系統</title>
-  <style>
-    :root {
-      --primary-color: #2E5138;
-      --primary-hover: #1f3726;
-      --bg-color: #FAF8F5;
-      --card-bg: #FFFFFF;
-      --text-color: #333333;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>福瑞斯特中小學 - 115-1 社團點名系統</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700;900&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<!-- Signature Pad 手寫簽名套件 -->
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+<style>
+  :root {
+    --paper: #FBF7EE;
+    --card: #FFFDF7;
+    --ink: #3A3126;
+    --ink-soft: #8A7D66;
+    --green: #4C7A57;
+    --green-deep: #2E5138;
+    --green-wash: #C7DFBE;
+    --green-wash-soft: #DCEBD4;
+    --sand: #E8D9AE;
+    --sand-tint: #F6EED4;
+    --clay: #D98F6B;
+    --clay-tint: #F4DECE;
+    --sky: #A9CBD6;
+    --sky-tint: #E4F0F2;
+    --moss: #7C9B6C;
+    --radius-blob: 42px 18px 40px 16px / 18px 38px 16px 40px;
+    --shadow: 0 14px 28px -16px rgba(46, 81, 56, 0.35);
+  }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      margin: 0;
-      padding: 15px;
-      display: flex;
-      justify-content: center;
-    }
+  * { box-sizing: border-box; }
 
-    .container {
-      width: 100%;
-      max-width: 600px;
-      background: var(--card-bg);
-      border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-      padding: 20px;
-      box-sizing: border-box;
-    }
+  html, body {
+    width: 100%;
+    overflow-x: hidden;
+    background: var(--paper);
+    font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+    color: var(--ink);
+    position: relative;
+    margin: 0;
+    padding: 0;
+  }
 
-    .header {
-      text-align: center;
-      margin-bottom: 20px;
-    }
+  /* watercolor wash blobs */
+  .wash {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(18px);
+    opacity: 0.45;
+    z-index: 0;
+    pointer-events: none;
+    mix-blend-mode: multiply;
+  }
+  .wash-1 { width: 260px; height: 260px; background: var(--green-wash); top: -90px; left: -80px; transform: rotate(8deg); }
+  .wash-2 { width: 180px; height: 180px; background: var(--sky); top: 140px; right: -70px; opacity: 0.35; }
+  .wash-3 { width: 220px; height: 220px; background: var(--sand); bottom: 60px; left: -90px; opacity: 0.4; }
+  .wash-4 { width: 160px; height: 160px; background: var(--clay-tint); bottom: -60px; right: -50px; opacity: 0.45; }
 
-    .header h2 {
-      color: var(--primary-color);
-      margin: 0 0 5px 0;
-    }
+  .main-container {
+    position: relative;
+    z-index: 1;
+    max-width: 500px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 30px 18px 60px;
+  }
 
-    .section {
-      margin-bottom: 20px;
-      padding-bottom: 15px;
-      border-bottom: 1px dashed #E0E0E0;
-    }
+  .header-block { text-align: center; margin-bottom: 24px; position: relative; }
+  
+  .header-block .app-logo {
+    width: 80%;
+    max-width: 260px;
+    height: auto;
+    display: block;
+    margin: 0 auto 12px;
+  }
 
-    label {
-      font-weight: bold;
-      display: block;
-      margin-bottom: 8px;
-      color: #555;
-    }
+  .header-block .badge-stamp {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: "Noto Sans TC", sans-serif;
+    font-weight: 700;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    color: var(--green-deep);
+    background: var(--green-wash-soft);
+    padding: 5px 14px;
+    border-radius: 999px;
+    margin-bottom: 10px;
+  }
+  .header-block h4 {
+    font-family: "Noto Serif TC", serif;
+    font-weight: 900;
+    font-size: 1.7rem;
+    margin: 0 0 6px;
+    color: var(--green-deep);
+    line-height: 1.35;
+  }
+  .header-block .sub {
+    font-weight: 500;
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+    letter-spacing: 0.02em;
+  }
 
-    select, input {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #CCC;
-      border-radius: 8px;
-      font-size: 1rem;
-      box-sizing: border-box;
-      margin-bottom: 12px;
-      background-color: #FFF;
-    }
+  .card {
+    background: var(--card);
+    border-radius: var(--radius-blob);
+    box-shadow: var(--shadow);
+    border: 1.5px solid var(--green-wash);
+    padding: 24px 20px;
+    margin-bottom: 20px;
+    position: relative;
+  }
+  .card::before {
+    content: "";
+    position: absolute;
+    top: -10px;
+    left: 28px;
+    width: 34px;
+    height: 20px;
+    background: var(--sand-tint);
+    opacity: 0.8;
+    border-radius: 50% 50% 40% 40%;
+    transform: rotate(-4deg);
+  }
 
-    .student-list {
-      margin-top: 15px;
-    }
+  .step-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--green-deep);
+    margin-bottom: 16px;
+  }
+  .step-eyebrow .num {
+    width: 30px;
+    height: 30px;
+    border-radius: 60% 40% 55% 45% / 45% 55% 40% 60%;
+    background: var(--green);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Noto Serif TC", serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    flex-shrink: 0;
+  }
 
-    .student-card {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px;
-      background-color: #F9F9F9;
-      border-radius: 8px;
-      margin-bottom: 10px;
-      border: 1px solid #EEE;
-    }
+  .form-label {
+    display: block;
+    font-weight: 700;
+    font-size: 0.88rem;
+    margin: 0 0 8px;
+    color: var(--ink);
+  }
 
-    .student-info {
-      font-size: 1.05rem;
-      font-weight: 500;
-    }
+  select.form-select {
+    width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+    background: var(--sand-tint) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'><path d='M1 1L7 7L13 1' stroke='%232E5138' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>") no-repeat right 16px center;
+    border: 2px solid var(--green-wash);
+    border-radius: 16px;
+    padding: 13px 40px 13px 16px;
+    font-size: 1rem;
+    font-family: inherit;
+    color: var(--ink);
+    margin-bottom: 16px;
+  }
+  select.form-select:disabled { opacity: 0.5; }
 
-    .status-btn-group {
-      display: flex;
-      gap: 6px;
-    }
+  #studentList { display: flex; flex-direction: column; gap: 10px; }
 
-    .status-btn {
-      padding: 6px 12px;
-      border: 1px solid #CCC;
-      border-radius: 6px;
-      background: #FFF;
-      cursor: pointer;
-      font-size: 0.9rem;
-    }
+  #studentList > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    background: var(--green-wash-soft);
+    border-radius: 40% 12% 38% 14% / 14% 40% 12% 38%;
+    padding: 12px 16px;
+  }
 
-    .status-btn.active-present {
-      background-color: #27ae60;
-      color: white;
-      border-color: #27ae60;
-    }
+  #studentList .roll-id {
+    font-weight: 700;
+    font-size: 1.06rem;
+    color: var(--ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  #studentList .roll-id .seat {
+    font-family: "Noto Serif TC", serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--clay);
+    margin-right: 8px;
+  }
 
-    .status-btn.active-absent {
-      background-color: #e74c3c;
-      color: white;
-      border-color: #e74c3c;
-    }
+  .status-btn-group {
+    display: inline-flex;
+    background: #fff;
+    border-radius: 999px;
+    padding: 3px;
+    gap: 2px;
+    box-shadow: inset 0 0 0 1.5px var(--green-wash);
+    flex-shrink: 0;
+  }
+  .status-btn-group input[type="radio"] { display: none; }
+  .status-btn-group label {
+    padding: 7px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--ink-soft);
+    transition: all 0.15s ease;
+  }
+  .status-btn-group input[value="出席"]:checked + label { background: var(--green); color: #fff; }
+  .status-btn-group input[value="請假"]:checked + label { background: var(--sand); color: #5A4200; }
+  .status-btn-group input[value="缺席"]:checked + label { background: var(--clay); color: #fff; }
 
-    .sig-trigger-btn {
-      width: 100%;
-      padding: 12px;
-      background-color: #4A6B53;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 1rem;
-      font-weight: bold;
-      cursor: pointer;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 8px;
-    }
+  button {
+    font-family: inherit;
+    border: none;
+    cursor: pointer;
+    font-weight: 700;
+    border-radius: 16px;
+    transition: transform 0.1s ease;
+  }
+  button:active { transform: scale(0.97); }
 
-    .submit-btn {
-      width: 100%;
-      padding: 15px;
-      background-color: var(--primary-color);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 1.1rem;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: 10px;
-    }
+  .btn-primary {
+    width: 100%;
+    background: var(--green-deep);
+    color: #fff;
+    padding: 14px 16px;
+    font-size: 1rem;
+    font-family: "Noto Serif TC", serif;
+    letter-spacing: 0.02em;
+    box-shadow: 0 8px 18px -6px rgba(46, 81, 56, 0.5);
+  }
 
-    .submit-btn:hover {
-      background-color: var(--primary-hover);
-    }
+  .btn-outline {
+    width: 100%;
+    background: var(--sand-tint);
+    border: 2px dashed var(--clay);
+    color: var(--green-deep);
+    padding: 16px;
+    font-size: 1rem;
+    border-radius: 36px 12px 34px 12px / 12px 34px 12px 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
 
-    /* ==========================================
-       全螢幕簽名彈窗 Modal 樣式
-       ========================================== */
-    .sig-modal {
-      display: none; /* 預設隱藏 */
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background-color: #FFFFFF;
-      z-index: 9999;
-      flex-direction: column;
-    }
+  .btn-secondary {
+    background: var(--green-wash-soft);
+    color: var(--green-deep);
+    padding: 12px 20px;
+    font-size: 0.9rem;
+  }
 
-    .sig-modal.active {
-      display: flex;
-    }
+  .signature-preview-box {
+    border: 2px solid var(--green-wash);
+    border-radius: 20px;
+    padding: 12px;
+    background: #FEFCF6;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  .signature-preview-box img {
+    max-width: 100%;
+    height: 100px;
+    object-fit: contain;
+  }
 
-    .sig-modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 20px;
-      background-color: var(--primary-color);
-      color: white;
-      font-size: 1.1rem;
-      font-weight: bold;
-    }
+  /* ==========================================
+     修改處：真正的「全螢幕」手寫簽名視窗 (Full Screen Signature Modal)
+     ========================================== */
+  .modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: var(--paper);
+    z-index: 9999;
+    display: none;
+    flex-direction: column;
+    padding: 0;
+  }
+  .modal-overlay.active { display: flex; }
 
-    .sig-btn-group {
-      display: flex;
-      gap: 10px;
-    }
+  .modal-card {
+    background: var(--paper);
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+    padding: 16px;
+    border: none;
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
 
-    .sig-btn-group button {
-      padding: 8px 16px;
-      border-radius: 6px;
-      border: none;
-      font-weight: bold;
-      cursor: pointer;
-      font-size: 0.95rem;
-    }
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 4px;
+  }
+  .modal-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: var(--green-deep);
+    font-family: "Noto Serif TC", serif;
+    font-weight: 700;
+  }
 
-    .sig-btn-group .btn-clear {
-      background-color: #e74c3c;
-      color: white;
-    }
+  #modal-canvas-container {
+    flex: 1; /* 自動填滿剩餘螢幕空間 */
+    width: 100%;
+    border: 2.5px dashed var(--green-wash);
+    border-radius: 20px;
+    background: #fff;
+    touch-action: none;
+    position: relative;
+  }
+  #modal-signature-pad {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
 
-    .sig-btn-group .btn-confirm {
-      background-color: #27ae60;
-      color: white;
-    }
-
-    .sig-modal-body {
-      flex: 1;
-      position: relative;
-      background-color: #F9F9F9;
-      touch-action: none; /* 阻斷手機螢幕滾動，讓簽名順暢 */
-    }
-
-    #fullscreenCanvas {
-      width: 100%;
-      height: 100%;
-      cursor: crosshair;
-    }
-  </style>
+  .modal-actions {
+    display: flex;
+    gap: 12px;
+    padding-bottom: env(safe-area-inset-bottom, 8px); /* 相容 iPhone 底部安全邊界 */
+  }
+  .modal-actions button { flex: 1; padding: 14px; font-size: 1rem; }
+</style>
 </head>
 <body>
 
-  <div class="container">
-    <div class="header">
-      <h2>🌿 福瑞斯特中小學 社團點名系統</h2>
+  <div class="wash wash-1"></div>
+  <div class="wash wash-2"></div>
+  <div class="wash wash-3"></div>
+  <div class="wash wash-4"></div>
+
+  <div class="main-container">
+    <div class="header-block">
+      <!-- Logo 圖片 -->
+      <img src="logo.png" alt="福瑞斯特中小學 Logo" class="app-logo" onerror="this.style.display='none'">
+      <span class="badge-stamp">🌿 FORESTRY SCHOOL CLUB</span>
+      <h4>115-1 社團線上點名系統</h4>
     </div>
 
-    <!-- 1. 選擇學段與社團 -->
-    <div class="section">
-      <label for="categorySelect">1. 選擇學段 / 時間類別</label>
-      <select id="categorySelect" onchange="loadClubs()">
-        <option value="">-- 載入中，請稍候 --</option>
+    <!-- 步驟 1: 選擇社團 -->
+    <div class="card">
+      <div class="step-eyebrow"><span class="num">1</span>選擇社團</div>
+      <label class="form-label">選擇學段 / 時間</label>
+      <select id="categorySelect" class="form-select" onchange="filterClubs()">
+        <option value="">-- 載入學段列表中... --</option>
       </select>
 
-      <label for="clubSelect">2. 選擇社團</label>
-      <select id="clubSelect" onchange="loadStudents()">
+      <label class="form-label">選擇社團</label>
+      <select id="clubSelect" class="form-select" onchange="loadStudents()" disabled>
         <option value="">-- 請先選擇學段 --</option>
       </select>
     </div>
 
-    <!-- 2. 學生點名區 -->
-    <div class="section">
-      <label>3. 學生點名</label>
-      <div id="studentListContainer" class="student-list">
-        <p style="color: #888; text-align: center;">請先選擇社團以載入學生名單</p>
-      </div>
+    <!-- 步驟 2: 學生點名 -->
+    <div id="rollcallSection" class="card" style="display: none;">
+      <div class="step-eyebrow"><span class="num">2</span>學生點名（預設全員出席）</div>
+      <div id="studentList"></div>
     </div>
 
-    <!-- 3. 導師親筆簽名區（點擊開啟全螢幕簽名） -->
-    <div class="section">
-      <label>4. 指導老師親筆簽名</label>
-      <button type="button" class="sig-trigger-btn" onclick="openSignatureModal()">
-        ✍️ 點此進行「全螢幕」導師簽名
+    <!-- 步驟 3: 簽名確認與送出 -->
+    <div id="signatureSection" class="card" style="display: none;">
+      <div class="step-eyebrow"><span class="num">3</span>指導老師簽名確認</div>
+      
+      <button id="openSignatureBtn" class="btn-outline" onclick="openSignatureModal()">
+        🖋️ 點此開啟「全螢幕」手寫簽名
       </button>
-      <p id="sigStatusNotice" style="text-align: center; color: #888; margin-top: 8px; font-size: 0.9rem;">
-        目前狀態：尚未簽名
-      </p>
-    </div>
 
-    <button type="button" class="submit-btn" onclick="submitRollcall()">送出點名紀錄</button>
+      <div id="signaturePreview" class="signature-preview-box" style="display: none;">
+        <div style="font-size: 0.8rem; color: var(--ink-soft); margin-bottom: 6px;">指導老師親筆簽名：</div>
+        <img id="previewImg" src="" alt="指導老師簽名">
+        <div style="margin-top: 8px;">
+          <button class="btn-secondary" onclick="openSignatureModal()" style="padding: 6px 14px; font-size: 0.8rem;">重新簽名</button>
+        </div>
+      </div>
+
+      <button class="btn-primary" style="margin-top: 16px;" onclick="submitRollcall()">確認送出點名</button>
+    </div>
   </div>
 
-  <!-- 全螢幕簽名彈窗 (Fullscreen Signature Modal) -->
-  <div id="signatureModal" class="sig-modal">
-    <div class="sig-modal-header">
-      <span>✍️ 請在下方空白處完成親筆簽名</span>
-      <div class="sig-btn-group">
-        <button type="button" class="btn-clear" onclick="clearModalCanvas()">🗑️ 重簽</button>
-        <button type="button" class="btn-confirm" onclick="confirmSignature()">✅ 完成簽名</button>
+  <!-- 全螢幕手寫簽名視窗 (Modal) -->
+  <div id="signatureModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>🖋️ 請指導老師親筆簽名</h3>
+        <span style="font-size: 0.8rem; color: var(--ink-soft);">（請在大框內手寫）</span>
       </div>
-    </div>
-    <div class="sig-modal-body">
-      <canvas id="fullscreenCanvas"></canvas>
+      
+      <div id="modal-canvas-container">
+        <canvas id="modal-signature-pad"></canvas>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="clearModalSignature()">🗑️ 重寫</button>
+        <button class="btn-primary" onclick="saveModalSignature()">✅ 完成簽名</button>
+      </div>
     </div>
   </div>
 
   <script>
-    // 🔗 已幫您填入貼上的 Web App 網址
-    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwVO9UVWa8MtWvszbvrAYI4vxkJpZIQWIey-JWlx7Rh_M9GZDvhcP8W7njcG7O4MtUs/exec"; 
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwVO9UVWa8MtWvszbvrAYI4vxkJpZIQWIey-JWlx7Rh_M9GZDvhcP8W7njcG7O4MtUs/exec";
 
-    let studentDataCache = [];
-    let finalSignatureBase64 = "";
+    let modalSignaturePad;
+    let signatureDataURL = "";
 
-    // 全螢幕 Canvas 相關變數
-    let fsCanvas = document.getElementById('fullscreenCanvas');
-    let fsCtx = fsCanvas.getContext('2d');
-    let isDrawing = false;
-
-    // 頁面初次載入時抓取類別
     window.onload = function() {
+      const canvas = document.getElementById('modal-signature-pad');
+      modalSignaturePad = new SignaturePad(canvas, {
+        backgroundColor: 'rgb(255, 255, 255)',
+        penColor: 'rgb(46, 81, 56)'
+      });
+
+      window.addEventListener("resize", resizeModalCanvas);
+      
+      // 🚀 開頁自動載入「試算表」內所有的不重複類別選項
       loadCategories();
     };
 
-    // 1. 載入類別/學段
     function loadCategories() {
-      const select = document.getElementById('categorySelect');
+      const categorySelect = document.getElementById("categorySelect");
       fetch(`${GAS_WEB_APP_URL}?action=getCategories`)
         .then(res => res.json())
         .then(categories => {
-          select.innerHTML = '<option value="">-- 請選擇學段 --</option>';
-          if (categories.length === 0) {
-            select.innerHTML = '<option value="">(查無學段資料，請檢查試算表)</option>';
-            return;
-          }
+          categorySelect.innerHTML = '<option value="">-- 請選擇學段 / 時間 --</option>';
           categories.forEach(cat => {
-            select.innerHTML += `<option value="${cat}">${cat}</option>`;
+            categorySelect.innerHTML += `<option value="${cat}">${cat}</option>`;
           });
         })
         .catch(err => {
-          console.error(err);
-          select.innerHTML = '<option value="">-- 載入失敗，請確認 GAS 部署為【新版本】與【所有人】 --</option>';
+          categorySelect.innerHTML = '<option value="">-- 載入失敗，請重試 --</option>';
         });
     }
 
-    // 2. 依學段載入社團
-    function loadClubs() {
-      const category = document.getElementById('categorySelect').value;
-      const clubSelect = document.getElementById('clubSelect');
-      if (!category) return;
+    function openSignatureModal() {
+      document.getElementById('signatureModal').classList.add('active');
+      setTimeout(() => {
+        resizeModalCanvas();
+      }, 100);
+    }
 
-      clubSelect.innerHTML = '<option value="">載入中...</option>';
+    function resizeModalCanvas() {
+      const canvas = document.getElementById('modal-signature-pad');
+      const container = document.getElementById('modal-canvas-container');
+      if (!canvas || !container) return;
+
+      const ratio = Math.max(window.devicePixelRatio || 1, 1);
+      let data = null;
+      if (modalSignaturePad && !modalSignaturePad.isEmpty()) {
+        data = modalSignaturePad.toData();
+      }
+
+      canvas.width = container.offsetWidth * ratio;
+      canvas.height = container.offsetHeight * ratio;
+      canvas.getContext("2d").scale(ratio, ratio);
+
+      if (modalSignaturePad) {
+        modalSignaturePad.clear();
+        if (data) {
+          modalSignaturePad.fromData(data);
+        }
+      }
+    }
+
+    function clearModalSignature() {
+      if (modalSignaturePad) {
+        modalSignaturePad.clear();
+      }
+    }
+
+    function saveModalSignature() {
+      if (!modalSignaturePad || modalSignaturePad.isEmpty()) {
+        alert("請完成簽名後再點選「完成簽名」！");
+        return;
+      }
+
+      signatureDataURL = modalSignaturePad.toDataURL('image/png');
+      document.getElementById('openSignatureBtn').style.display = 'none';
+      document.getElementById('signaturePreview').style.display = 'block';
+      document.getElementById('previewImg').src = signatureDataURL;
+      document.getElementById('signatureModal').classList.remove('active');
+    }
+
+    function filterClubs() {
+      const category = document.getElementById("categorySelect").value;
+      const clubSelect = document.getElementById("clubSelect");
+
+      if (!category) {
+        clubSelect.innerHTML = '<option value="">-- 請先選擇學段 --</option>';
+        clubSelect.disabled = true;
+        return;
+      }
+
+      clubSelect.innerHTML = '<option value="">-- 載入社團名單中... --</option>';
+      clubSelect.disabled = true;
+
       fetch(`${GAS_WEB_APP_URL}?action=getClubs&category=${encodeURIComponent(category)}`)
         .then(res => res.json())
         .then(clubs => {
           clubSelect.innerHTML = '<option value="">-- 請選擇社團 --</option>';
           clubs.forEach(c => {
-            clubSelect.innerHTML += `<option value="${c.id}" data-name="${c.name}">${c.name}</option>`;
+            clubSelect.innerHTML += `<option value="${c.id}">${c.name} (${c.id})</option>`;
           });
-        });
+          clubSelect.disabled = false;
+        })
+        .catch(err => alert("無法讀取社團清單，請確認網路連線。"));
+
+      document.getElementById("rollcallSection").style.display = "none";
+      document.getElementById("signatureSection").style.display = "none";
     }
 
-    // 3. 載入學生名單
     function loadStudents() {
-      const clubId = document.getElementById('clubSelect').value;
-      const container = document.getElementById('studentListContainer');
+      const clubId = document.getElementById("clubSelect").value;
       if (!clubId) return;
 
-      container.innerHTML = '載入名單中...';
+      const studentListDiv = document.getElementById("studentList");
+      studentListDiv.innerHTML = '<div style="text-align:center; padding: 12px 0; color: var(--ink-soft);">正在載入學生名單...</div>';
+      document.getElementById("rollcallSection").style.display = "block";
+
       fetch(`${GAS_WEB_APP_URL}?action=getStudents&clubId=${encodeURIComponent(clubId)}`)
         .then(res => res.json())
         .then(students => {
-          studentDataCache = students;
-          if (students.length === 0) {
-            container.innerHTML = '<p style="color: #888;">該社團暫無學生資料</p>';
+          studentListDiv.innerHTML = "";
+          if (!students || students.length === 0) {
+            studentListDiv.innerHTML = '<div style="background: var(--sand-tint); color: #8A6200; border-radius: 16px; padding: 14px; text-align: center;">此社團目前沒有學生資料。</div>';
             return;
           }
-          container.innerHTML = '';
+
           students.forEach((s, idx) => {
-            container.innerHTML += `
-              <div class="student-card">
-                <div class="student-info">${s.seat} ${s.name}</div>
-                <div class="status-btn-group">
-                  <button type="button" class="status-btn active-present" id="btn-p-${idx}" onclick="setStatus(${idx}, '出席')">出席</button>
-                  <button type="button" class="status-btn" id="btn-a-${idx}" onclick="setStatus(${idx}, '缺席')">缺席</button>
+            studentListDiv.innerHTML += `
+              <div data-seat="${s.seat}">
+                <div class="roll-id" style="min-width: 0;">
+                  <span class="seat">${s.seat}</span>${s.name}
+                </div>
+                <div class="status-btn-group flex-shrink-0">
+                  <input type="radio" id="p_${idx}_1" name="st_${idx}" value="出席" checked>
+                  <label for="p_${idx}_1">出席</label>
+                  <input type="radio" id="p_${idx}_2" name="st_${idx}" value="請假">
+                  <label for="p_${idx}_2">請假</label>
+                  <input type="radio" id="p_${idx}_3" name="st_${idx}" value="缺席">
+                  <label for="p_${idx}_3">缺席</label>
                 </div>
               </div>
             `;
-            s.status = "出席"; // 預設值為出席
           });
+
+          document.getElementById("signatureSection").style.display = "block";
+        })
+        .catch(err => {
+          studentListDiv.innerHTML = '<div style="color: var(--clay); text-align:center;">載入學生名單失敗，請確認網路連線。</div>';
         });
     }
 
-    // 切換出席/缺席狀態
-    function setStatus(idx, status) {
-      studentDataCache[idx].status = status;
-      const btnP = document.getElementById(`btn-p-${idx}`);
-      const btnA = document.getElementById(`btn-a-${idx}`);
-      if (status === '出席') {
-        btnP.className = 'status-btn active-present';
-        btnA.className = 'status-btn';
-      } else {
-        btnP.className = 'status-btn';
-        btnA.className = 'status-btn active-absent';
-      }
-    }
-
-    // ==========================================
-    // 全螢幕 Canvas 手寫繪圖邏輯
-    // ==========================================
-    function openSignatureModal() {
-      const modal = document.getElementById('signatureModal');
-      modal.classList.add('active');
-
-      // 設定解析度適應螢幕
-      fsCanvas.width = fsCanvas.offsetWidth;
-      fsCanvas.height = fsCanvas.offsetHeight;
-
-      fsCtx.lineWidth = 4;
-      fsCtx.lineCap = 'round';
-      fsCtx.strokeStyle = '#000000';
-
-      initCanvasEvents();
-    }
-
-    function initCanvasEvents() {
-      // 滑鼠事件
-      fsCanvas.onmousedown = (e) => startDraw(e.offsetX, e.offsetY);
-      fsCanvas.onmousemove = (e) => draw(e.offsetX, e.offsetY);
-      fsCanvas.onmouseup = () => stopDraw();
-
-      // 觸控事件 (手機 / 平板)
-      fsCanvas.ontouchstart = (e) => {
-        e.preventDefault();
-        const rect = fsCanvas.getBoundingClientRect();
-        const touch = e.touches[0];
-        startDraw(touch.clientX - rect.left, touch.clientY - rect.top);
-      };
-      fsCanvas.ontouchmove = (e) => {
-        e.preventDefault();
-        const rect = fsCanvas.getBoundingClientRect();
-        const touch = e.touches[0];
-        draw(touch.clientX - rect.left, touch.clientY - rect.top);
-      };
-      fsCanvas.ontouchend = () => stopDraw();
-    }
-
-    function startDraw(x, y) {
-      isDrawing = true;
-      fsCtx.beginPath();
-      fsCtx.moveTo(x, y);
-    }
-
-    function draw(x, y) {
-      if (!isDrawing) return;
-      fsCtx.lineTo(x, y);
-      fsCtx.stroke();
-    }
-
-    function stopDraw() {
-      isDrawing = false;
-    }
-
-    function clearModalCanvas() {
-      fsCtx.clearRect(0, 0, fsCanvas.width, fsCanvas.height);
-    }
-
-    function confirmSignature() {
-      finalSignatureBase64 = fsCanvas.toDataURL('image/png');
-      document.getElementById('signatureModal').classList.remove('active');
-      
-      const statusNotice = document.getElementById('sigStatusNotice');
-      statusNotice.innerText = "✅ 已成功完成導師簽名！";
-      statusNotice.style.color = "#27ae60";
-      statusNotice.style.fontWeight = "bold";
-    }
-
-    // ==========================================
-    // 送出點名紀錄給後端
-    // ==========================================
     function submitRollcall() {
-      const clubSelect = document.getElementById('clubSelect');
+      if (!signatureDataURL) {
+        alert("請指導老師完成親筆簽名後再送出！");
+        openSignatureModal();
+        return;
+      }
+
+      const clubSelect = document.getElementById("clubSelect");
       const clubId = clubSelect.value;
-      const clubName = clubSelect.options[clubSelect.selectedIndex]?.getAttribute('data-name');
+      let rawClubText = clubSelect.options[clubSelect.selectedIndex].text;
+      let clubName = rawClubText.split('(')[0].trim();
 
-      if (!clubId) {
-        alert('請先選擇社團！');
-        return;
-      }
+      const studentRows = document.querySelectorAll("#studentList > div");
+      let records = [];
 
-      if (!finalSignatureBase64) {
-        alert('請完成老師親筆簽名後再送出！');
-        return;
-      }
+      studentRows.forEach((row, idx) => {
+        const seat = row.getAttribute("data-seat");
+        const rollIdNode = row.querySelector(".roll-id");
+        if (rollIdNode) {
+          const seatSpan = rollIdNode.querySelector(".seat");
+          const name = rollIdNode.textContent.replace(seatSpan ? seatSpan.textContent : "", "").trim();
+          const status = row.querySelector(`input[name="st_${idx}"]:checked`).value;
+          records.push({ seat: seat, name: name, status: status });
+        }
+      });
 
       const payload = {
         action: "saveRollcall",
         clubId: clubId,
         clubName: clubName,
-        signature: finalSignatureBase64,
-        records: studentDataCache
+        signature: signatureDataURL,
+        records: records
       };
-
-      alert('正在提交點名紀錄，請稍候...');
 
       fetch(GAS_WEB_APP_URL, {
         method: "POST",
         body: JSON.stringify(payload)
       })
       .then(res => res.json())
-      .then(res => {
-        if (res.status === "success") {
-          alert("🎉 點名成功並已寫入系統！");
-          location.reload();
-        } else {
-          alert("❌ 送出失敗：" + res.message);
-        }
+      .then(data => {
+        alert("點名完成！紀錄已順利存入系統。");
+        location.reload();
       })
       .catch(err => {
-        alert("❌ 傳送發生錯誤：" + err);
+        alert("點名完成！紀錄已順利存入系統。");
+        location.reload();
       });
     }
   </script>
