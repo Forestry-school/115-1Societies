@@ -160,13 +160,13 @@
     color: var(--primary-dark);
     font-family: "Baloo 2", sans-serif;
     font-weight: 700;
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     padding: 3px 9px;
     border-radius: 999px;
     margin-bottom: 4px;
   }
 
-  #studentList .fw-bold { font-weight: 700; font-size: 1.02rem; }
+  #studentList .fw-bold { font-weight: 700; font-size: 1.1rem; }
 
   .status-btn-group {
     display: inline-flex;
@@ -477,16 +477,17 @@
         .then(res => res.json())
         .then(students => {
           studentListDiv.innerHTML = "";
-          if (students.length === 0) {
+          if (!students || students.length === 0) {
             studentListDiv.innerHTML = '<div style="background: var(--yellow-tint); color: #8A6200; border-radius: 12px; padding: 14px; text-align: center;">此社團目前沒有學生資料。</div>';
             return;
           }
 
+          // 核心修正重點：標籤顯示座號 s.seat，下方大字顯示姓名 s.name
           students.forEach((s, idx) => {
             studentListDiv.innerHTML += `
               <div data-seat="${s.seat}">
                 <div style="min-width: 0;">
-                  <span class="badge">${s.seat}</span>
+                  <span class="badge">座號：${s.seat}</span>
                   <div class="fw-bold">${s.name}</div>
                 </div>
                 <div class="status-btn-group flex-shrink-0">
@@ -502,10 +503,12 @@
           });
 
           document.getElementById("signatureSection").style.display = "block";
+        })
+        .catch(err => {
+          studentListDiv.innerHTML = '<div style="color:red; text-align:center;">載入學生名單失敗，請確認網路連線。</div>';
         });
     }
 
-    // 前端僅傳送社團、簽名檔與學生名單
     function submitRollcall() {
       if (!signatureDataURL) {
         alert("請指導老師完成親筆簽名後再送出！");
@@ -523,9 +526,12 @@
 
       studentRows.forEach((row, idx) => {
         const seat = row.getAttribute("data-seat");
-        const name = row.querySelector(".fw-bold").innerText;
-        const status = row.querySelector(`input[name="st_${idx}"]:checked`).value;
-        records.push({ seat: seat, name: name, status: status });
+        const nameNode = row.querySelector(".fw-bold");
+        if (nameNode) {
+          const name = nameNode.innerText;
+          const status = row.querySelector(`input[name="st_${idx}"]:checked`).value;
+          records.push({ seat: seat, name: name, status: status });
+        }
       });
 
       const payload = {
