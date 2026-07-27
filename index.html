@@ -69,7 +69,6 @@
 
   .header-block { text-align: center; margin-bottom: 24px; position: relative; }
   
-  /* 補回 Logo 樣式 */
   .header-block .app-logo {
     width: 80%;
     max-width: 260px;
@@ -351,7 +350,7 @@
 
   <div class="main-container">
     <div class="header-block">
-      <!-- 補回 Logo 圖片 -->
+      <!-- Logo 圖片 -->
       <img src="logo.png" alt="福瑞斯特中小學 Logo" class="app-logo" onerror="this.style.display='none'">
       <span class="badge-stamp">🌿 FORESTRY SCHOOL CLUB</span>
       <h4>115-1 社團線上點名系統</h4>
@@ -420,6 +419,7 @@
   </div>
 
   <script>
+    // 已自動替換為您最新的 Google Apps Script 部署網址
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwVO9UVWa8MtWvszbvrAYI4vxkJpZIQWIey-JWlx7Rh_M9GZDvhcP8W7njcG7O4MtUs/exec";
 
     let modalSignaturePad;
@@ -529,7 +529,6 @@
             return;
           }
 
-          // 座號與姓名合併顯示於同一行，例如：30102 吳奕霖
           students.forEach((s, idx) => {
             studentListDiv.innerHTML += `
               <div data-seat="${s.seat}">
