@@ -44,7 +44,7 @@
     padding: 0;
   }
 
-  /* 背景四角柔和色塊裝飾 */
+  /* 背景圓形色塊裝飾 */
   .blob {
     position: fixed;
     border-radius: 50%;
@@ -67,7 +67,7 @@
     padding: 28px 16px 60px;
   }
 
-  /* 校徽與標頭 */
+  /* 標頭 */
   .header-block { text-align: center; margin-bottom: 22px; }
   .header-block img {
     width: 85%;
@@ -234,7 +234,7 @@
     font-size: 0.9rem;
   }
 
-  /* 簽名預覽區 */
+  /* 簽名預覽 */
   .signature-preview-box {
     border: 2px solid var(--primary-tint);
     border-radius: var(--radius-md);
@@ -249,7 +249,7 @@
     object-fit: contain;
   }
 
-  /* 獨立全螢幕簽名 Modal 彈窗 */
+  /* 獨立簽名視窗 (Modal) */
   .modal-overlay {
     position: fixed;
     top: 0; left: 0; width: 100vw; height: 100vh;
@@ -284,7 +284,7 @@
 
   #modal-canvas-container {
     width: 100%;
-    height: 280px; /* 大畫布，超好寫 */
+    height: 300px;
     border: 2.5px dashed #CFE3D3;
     border-radius: var(--radius-md);
     background: #fff;
@@ -310,7 +310,6 @@
   <div class="blob blob-4"></div>
 
   <div class="main-container">
-    <!-- 校徽與標頭區塊 -->
     <div class="header-block">
       <img src="logo.png" alt="福瑞斯特中小學 Logo" onerror="this.style.display='none'">
       <h4>115-1 社團線上點名系統</h4>
@@ -344,12 +343,10 @@
     <div id="signatureSection" class="card" style="display: none;">
       <div class="step-eyebrow"><span class="num">3</span>指導老師簽名確認</div>
       
-      <!-- 未簽名狀態顯示的按鈕 -->
       <button id="openSignatureBtn" class="btn-outline" onclick="openSignatureModal()">
         ✍️ 點此開啟大畫布手寫簽名
       </button>
 
-      <!-- 已簽名完成後的預覽圖 -->
       <div id="signaturePreview" class="signature-preview-box" style="display: none;">
         <div style="font-size: 0.8rem; color: var(--ink-soft); margin-bottom: 6px;">指導老師親筆簽名：</div>
         <img id="previewImg" src="" alt="指導老師簽名">
@@ -362,12 +359,12 @@
     </div>
   </div>
 
-  <!-- 獨立大畫布 Modal 視窗 -->
+  <!-- 獨立簽名視窗 (Modal) -->
   <div id="signatureModal" class="modal-overlay">
     <div class="modal-card">
       <div class="modal-header">
         <h3>✍️ 請指導老師親筆簽名</h3>
-        <span style="font-size: 0.8rem; color: var(--ink-soft);">（請使用全空白處簽名）</span>
+        <span style="font-size: 0.8rem; color: var(--ink-soft);">（請在大框內手寫）</span>
       </div>
       
       <div id="modal-canvas-container">
@@ -385,7 +382,7 @@
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz2hL5IREZFWhJiwMwSLcMkMP1oPPczBOZLmMpKfYDnrXxzdhuHlGYpvON7zKlQ23BD/exec";
 
     let modalSignaturePad;
-    let signatureDataURL = ""; // 儲存簽名圖檔
+    let signatureDataURL = "";
 
     window.onload = function() {
       const canvas = document.getElementById('modal-signature-pad');
@@ -394,27 +391,22 @@
         penColor: 'rgb(0, 0, 0)'
       });
 
-      // 旋轉手機時自動調整畫布大小
       window.addEventListener("resize", resizeModalCanvas);
     };
 
-    // 開啟簽名彈窗
     function openSignatureModal() {
-      const modal = document.getElementById('signatureModal');
-      modal.classList.add('active');
+      document.getElementById('signatureModal').classList.add('active');
       setTimeout(() => {
         resizeModalCanvas();
       }, 100);
     }
 
-    // 調整畫布清晰度與大小
     function resizeModalCanvas() {
       const canvas = document.getElementById('modal-signature-pad');
       const container = document.getElementById('modal-canvas-container');
       if (!canvas || !container) return;
 
       const ratio = Math.max(window.devicePixelRatio || 1, 1);
-      
       let data = null;
       if (modalSignaturePad && !modalSignaturePad.isEmpty()) {
         data = modalSignaturePad.toData();
@@ -432,14 +424,12 @@
       }
     }
 
-    // 清空簽名
     function clearModalSignature() {
       if (modalSignaturePad) {
         modalSignaturePad.clear();
       }
     }
 
-    // 儲存簽名並回到主畫面
     function saveModalSignature() {
       if (!modalSignaturePad || modalSignaturePad.isEmpty()) {
         alert("請完成簽名後再點選「完成簽名」！");
@@ -447,13 +437,9 @@
       }
 
       signatureDataURL = modalSignaturePad.toDataURL('image/png');
-      
-      // 更新主畫面顯示
       document.getElementById('openSignatureBtn').style.display = 'none';
       document.getElementById('signaturePreview').style.display = 'block';
       document.getElementById('previewImg').src = signatureDataURL;
-
-      // 關閉 Modal
       document.getElementById('signatureModal').classList.remove('active');
     }
 
@@ -525,7 +511,7 @@
         });
     }
 
-    // ⚡ 包含時間帶入與完整資料送出
+    // 發送精準對應的 8 個欄位資料
     function submitRollcall() {
       if (!signatureDataURL) {
         alert("請指導老師完成親筆簽名後再送出！");
@@ -535,7 +521,9 @@
 
       const clubSelect = document.getElementById("clubSelect");
       const clubId = clubSelect.value;
-      const clubName = clubSelect.options[clubSelect.selectedIndex].text;
+      let rawClubText = clubSelect.options[clubSelect.selectedIndex].text;
+      let clubName = rawClubText.split('(')[0].trim();
+
       const studentRows = document.querySelectorAll("#studentList > div");
       let records = [];
 
@@ -547,19 +535,23 @@
       });
 
       const now = new Date();
-      const currentDate = now.toLocaleDateString('zh-TW'); // 格式: yyyy/M/d
-      const currentTime = now.toTimeString().split(' ')[0]; // 格式: HH:mm:ss
+      // 取得日期 (格式: YYYY/MM/DD)
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const currentDate = `${year}/${month}/${day}`;
+
+      // 取得時間 (格式: HH:mm:ss)
+      const currentTime = now.toTimeString().split(' ')[0];
 
       const payload = {
         action: "saveRollcall",
-        school: "福瑞斯特中小學",
-        semester: "115-1",
-        clubId: clubId,
-        clubName: clubName,
-        date: currentDate,
-        time: currentTime, // 帶入點名時間
-        signature: signatureDataURL,
-        records: records
+        clubId: clubId,        // 社團ID
+        clubName: clubName,    // 社團名稱
+        date: currentDate,     // 日期
+        time: currentTime,     // 點名時間
+        signature: signatureDataURL, // 簽名檔
+        records: records       // 學生名單 (含座號、姓名、出席狀態)
       };
 
       fetch(GAS_WEB_APP_URL, {
@@ -572,7 +564,7 @@
         location.reload();
       })
       .catch(err => {
-        alert("資料已送出！");
+        alert("點名完成！紀錄已順利存入系統。");
         location.reload();
       });
     }
