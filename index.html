@@ -75,7 +75,6 @@
   </div>
 
   <script>
-    // 已自動填入您的 Apps Script Web App URL
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz2hL5IREZFWhJiwMwSLcMkMP1oPPczBOZLmMpKfYDnrXxzdhuHlGYpvON7zKlQ23BD/exec";
 
     let signaturePad;
@@ -95,7 +94,6 @@
       resizeCanvas();
     };
 
-    // 動態載入社團清單
     function filterClubs() {
       const category = document.getElementById("categorySelect").value;
       const clubSelect = document.getElementById("clubSelect");
@@ -118,15 +116,13 @@
           });
           clubSelect.disabled = false;
         })
-        .catch(err => {
-          alert("無法讀取社團清單，請檢查網路或 Apps Script 設定。");
-        });
+        .catch(err => alert("無法讀取社團清單，請確認連線。"));
 
       document.getElementById("rollcallSection").style.display = "none";
       document.getElementById("signatureSection").style.display = "none";
     }
 
-    // 載入社團學生名單
+    // 載入學生名單（包含班級座號）
     function loadStudents() {
       const clubId = document.getElementById("clubSelect").value;
       if (!clubId) return;
@@ -146,9 +142,9 @@
 
           students.forEach((s, idx) => {
             studentListDiv.innerHTML += `
-              <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+              <div class="d-flex justify-content-between align-items-center border-bottom py-2" data-seat="${s.seat}">
                 <div>
-                  <span class="badge bg-secondary me-2">${s.class}</span>
+                  <span class="badge bg-secondary me-1">${s.seat}</span>
                   <span class="fw-bold fs-5">${s.name}</span>
                 </div>
                 <div class="status-btn-group">
@@ -168,7 +164,6 @@
 
     function clearSignature() { signaturePad.clear(); }
 
-    // 打包並送出點名紀錄
     function submitRollcall() {
       if (signaturePad.isEmpty()) {
         alert("請指導老師完成親筆簽名後再送出！");
@@ -182,9 +177,10 @@
       let records = [];
 
       studentRows.forEach((row, idx) => {
+        const seat = row.getAttribute("data-seat");
         const name = row.querySelector(".fw-bold").innerText;
         const status = row.querySelector(`input[name="st_${idx}"]:checked`).value;
-        records.push({ name: name, status: status });
+        records.push({ seat: seat, name: name, status: status });
       });
 
       const payload = {
