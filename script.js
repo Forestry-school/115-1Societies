@@ -3,16 +3,15 @@ const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwVO9UVWa8MtWvs
 let modalSignaturePad;
 let signatureDataURL = "";
 
-// ⚡ 核心優化：JSONP 跨網域請求工具（解決 GitHub Pages 阻擋與卡死）
+// ⚡ 核心修復：JSONP 工具（繞過 CORS 阻擋）
 function fetchJSONP(url) {
   return new Promise((resolve, reject) => {
     const callbackName = 'jsonp_cb_' + Math.round(100000 * Math.random());
     const script = document.createElement('script');
 
-    // 設定 10 秒超時保護
     const timeoutId = setTimeout(() => {
       cleanUp();
-      reject(new Error("請求超時，請檢查網路狀態"));
+      reject(new Error("請求超時"));
     }, 10000);
 
     function cleanUp() {
@@ -56,7 +55,7 @@ function preventScroll(e) {
   e.preventDefault();
 }
 
-// 1. 載入社團類別 (改用 JSONP)
+// 載入社團類別
 function loadCategories() {
   const categorySelect = document.getElementById("categorySelect");
   fetchJSONP(`${GAS_WEB_APP_URL}?action=getCategories`)
@@ -132,7 +131,7 @@ function saveModalSignature() {
   closeModal();
 }
 
-// 2. 根據類別篩選社團 (改用 JSONP)
+// 根據類別篩選社團
 function filterClubs() {
   const category = document.getElementById("categorySelect").value;
   const clubSelect = document.getElementById("clubSelect");
@@ -155,8 +154,7 @@ function filterClubs() {
       clubSelect.disabled = false;
     })
     .catch(err => {
-      console.error(err);
-      alert("無法讀取社團清單，請確認網路連線。");
+      alert("無法讀取社团清單，請確認網路連線。");
       clubSelect.innerHTML = '<option value="">-- 載入失敗，請重試 --</option>';
     });
 
@@ -164,7 +162,7 @@ function filterClubs() {
   document.getElementById("signatureSection").style.display = "none";
 }
 
-// 3. 載入學生清單與今日紀錄 (改用 JSONP)
+// 載入學生清單與今日紀錄
 function loadStudents() {
   const clubId = document.getElementById("clubSelect").value;
   if (!clubId) return;
@@ -188,7 +186,6 @@ function loadStudents() {
         return;
       }
 
-      // 判斷今日是否已點過名
       const hasRecord = Object.keys(existingRecords).length > 0;
       if (hasRecord) {
         editNotice.style.display = "flex";
@@ -230,12 +227,11 @@ function loadStudents() {
       document.getElementById("signatureSection").style.display = "block";
     })
     .catch(err => {
-      console.error(err);
       studentListDiv.innerHTML = '<div style="color: var(--clay); text-align:center;">載入學生名單失敗，請確認網路連線。</div>';
     });
 }
 
-// 4. 送出點名紀錄 (POST 方法保持 no-cors 模式)
+// 送出點名紀錄
 function submitRollcall() {
   if (!signatureDataURL) {
     alert("請指導老師完成親筆簽名後再送出！");
@@ -257,8 +253,7 @@ function submitRollcall() {
     if (rollIdNode) {
       const seatSpan = rollIdNode.querySelector(".seat");
       const name = rollIdNode.textContent.replace(seatSpan ? seatSpan.textContent : "", "").trim();
-      const statusRadio = row.querySelector(`input[name="st_${idx}"]:checked`);
-      const status = statusRadio ? statusRadio.value : "出席";
+      const status = row.querySelector(`input[name="st_${idx}"]:checked`).value;
       records.push({ seat: seat, name: name, status: status });
     }
   });
