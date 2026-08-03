@@ -5,69 +5,90 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>福瑞斯特中小學 - 社團線上點名系統</title>
   <link rel="stylesheet" href="style.css">
-  <!-- 引入 SignaturePad 簽名板函式庫 -->
-  <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
 </head>
 <body>
 
   <div class="container">
-    <!-- 標頭 -->
+    
+    <!-- 標頭區塊 -->
     <header class="header">
       <div class="logo-area">
-        <h1 class="school-title">🌲 福瑞斯特中小學</h1>
+        <!-- 若有本地校徽圖片檔請替換 src，預設為對應綠色盾牌圖案 -->
+        <img src="logo.png" alt="福瑞斯特中小學校徽" class="school-logo" onerror="this.onerror=null; this.src='https://cdn-icons-png.flaticon.com/512/2942/2942544.png';">
+        <h1 class="school-title">福瑞斯特中小學</h1>
         <p class="school-sub">Forestry Elementary and Junior High School</p>
       </div>
       <div class="badge">FORESTRY SCHOOL CLUB</div>
       <h2 class="system-title">115-1 社團線上點名系統</h2>
     </header>
 
-    <!-- 步驟 1：選擇學段/時間 -->
+    <!-- 步驟 1：選擇社團 -->
     <section class="card-box">
-      <div class="step-title"><span>1</span> 選擇學段 / 時間</div>
+      <div class="step-title">
+        <span>1</span> 選擇社團
+      </div>
+      
       <div class="form-group">
         <label for="categorySelect">選擇學段 / 時間</label>
-        <select id="categorySelect" class="form-select">
+        <select id="categorySelect" class="form-select" onchange="onCategoryChange()">
           <option value="">-- 載入中... --</option>
         </select>
       </div>
-    </section>
 
-    <!-- 步驟 2：社團卡片列表 (預設隱藏) -->
-    <section id="clubSection" class="card-box" style="display: none;">
-      <div class="step-title"><span>2</span> 選擇社團</div>
-      <div id="clubCardContainer" class="club-grid">
-        <!-- 卡片將由 JS 動態生成 -->
+      <div class="form-group" id="clubSelectGroup" style="display: none;">
+        <label for="clubSelect">選擇社團</label>
+        <select id="clubSelect" class="form-select" onchange="onClubChange()">
+          <option value="">-- 請選擇社團 --</option>
+        </select>
       </div>
+
+      <!-- 社團卡片容器 (若使用卡片選擇時顯示) -->
+      <div id="clubCardContainer" class="club-grid" style="display: none;"></div>
     </section>
 
-    <!-- 表單包覆：點名表與簽名 -->
-    <form id="rollcallForm">
-      <!-- 步驟 3：學生點名名單 (預設隱藏) -->
-      <section id="rollcallSection" class="card-box" style="display: none;">
-        <div class="step-title"><span>3</span> 學生點名表</div>
-        <div id="studentList">
-          <!-- 點名表格將由 JS 動態生成 -->
-        </div>
-      </section>
+    <!-- 步驟 2：學生點名 -->
+    <section class="card-box" id="rollcallSection" style="display: none;">
+      <div class="step-title">
+        <span>2</span> 學生點名
+      </div>
+      <div id="studentListContainer"></div>
+    </section>
 
-      <!-- 步驟 4：指導老師簽名 (預設隱藏) -->
-      <section id="signatureSection" class="card-box" style="display: none;">
-        <div class="step-title"><span>4</span> 指導老師簽名</div>
-        <div class="signature-container">
-          <canvas id="signatureCanvas"></canvas>
-          <div class="signature-tools">
-            <button type="button" id="clearSigBtn" class="btn-secondary">清除重簽</button>
-          </div>
-        </div>
-        <div class="submit-area">
-          <button type="submit" id="submitBtn" class="btn-primary">儲存點名紀錄</button>
-        </div>
-      </section>
-    </form>
+    <!-- 步驟 3：指導老師簽名確認 -->
+    <section class="card-box" id="signatureSection" style="display: none;">
+      <div class="step-title">
+        <span>3</span> 指導老師簽名確認
+      </div>
+      
+      <div class="signature-box" onclick="openSignatureModal()">
+        <p class="signature-prompt">✍️ 點此開啟「全螢幕」手寫簽名</p>
+        <img id="signaturePreview" class="signature-preview" style="display: none;" alt="簽名預覽">
+      </div>
+
+      <button type="button" class="btn-primary" onclick="submitRollcall()">確認送出點名</button>
+    </section>
 
     <footer class="footer">
       製作人：TATA
     </footer>
+
+  </div>
+
+  <!-- 全螢幕簽名彈窗 Modal -->
+  <div id="signatureModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>手寫簽名</h3>
+        <button type="button" class="btn-close" onclick="closeSignatureModal()">&times;</button>
+      </div>
+      <div class="canvas-container">
+        <canvas id="signatureCanvas"></canvas>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary" onclick="clearSignature()">清除重簽</button>
+        <button type="button" class="btn-primary-sm" onclick="saveSignature()">完成簽名</button>
+      </div>
+    </div>
   </div>
 
   <script src="script.js"></script>
