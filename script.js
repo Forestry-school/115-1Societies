@@ -1,4 +1,3 @@
-// Google Apps Script API 網址
 const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyGrdJ8j-neGtzjsc4BXOVybWgBqtjjVsfKdxs2rh7spU6udfSXlj6grbstCaNK9XGR/exec";
 
 let currentSignatureData = "";
@@ -9,10 +8,9 @@ document.addEventListener("DOMContentLoaded", function() {
   initCanvas();
 });
 
-// 1. 載入第一層：學段 / 時間
+// 1. 載入第一層選單
 function loadCategories() {
   const categorySelect = document.getElementById("categorySelect");
-  
   fetch(`${GAS_WEB_APP_URL}?action=getCategories`, { redirect: "follow" })
     .then(res => res.json())
     .then(data => {
@@ -31,7 +29,7 @@ function loadCategories() {
     });
 }
 
-// 2. 選擇第一層後載入第二層：選擇社團
+// 2. 載入第二層社團下拉選單
 function fetchClubCards() {
   const category = document.getElementById("categorySelect").value;
   const clubSelectContainer = document.getElementById("clubSelectContainer");
@@ -66,7 +64,7 @@ function fetchClubCards() {
     });
 }
 
-// 3. 載入學生名單 (完全對應 CSS 的 #studentList > div 以及 status-btn-group)
+// 3. 載入學生名單 (完美對應截圖中的單列樣式)
 function fetchStudents() {
   const clubId = document.getElementById("clubSelect").value;
   const studentSection = document.getElementById("studentSection");
@@ -98,7 +96,6 @@ function fetchStudents() {
 
       editNotice.style.display = Object.keys(existingRecords).length > 0 ? "flex" : "none";
 
-      // HTML 結構必須完全滿足 #studentList > div
       let html = "";
       students.forEach((s, idx) => {
         const status = existingRecords[s.seat] || "出席";
@@ -123,7 +120,6 @@ function fetchStudents() {
       });
       studentList.innerHTML = html;
 
-      // 重置或載入舊的簽名預覽
       if (existingSignature) {
         currentSignatureData = existingSignature;
         document.getElementById("signaturePreview").src = existingSignature;
@@ -141,7 +137,7 @@ function fetchStudents() {
     });
 }
 
-// 4. 手寫簽名板（對應 modal-overlay 與 modal-signature-pad）
+// 4. 全螢幕手寫板邏輯
 function initCanvas() {
   canvas = document.getElementById("modal-signature-pad");
   if (!canvas) return;
@@ -151,10 +147,7 @@ function initCanvas() {
     const rect = canvas.getBoundingClientRect();
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    return {
-      x: clientX - rect.left,
-      y: clientY - rect.top
-    };
+    return { x: clientX - rect.left, y: clientY - rect.top };
   }
 
   function startDraw(e) {
@@ -193,7 +186,7 @@ function openSignatureModal() {
     canvas.height = container.clientHeight;
     ctx.lineWidth = 3;
     ctx.lineCap = "round";
-    ctx.strokeStyle = "#2E5138"; // 墨綠色筆觸
+    ctx.strokeStyle = "#2E5138";
   }, 100);
 }
 
