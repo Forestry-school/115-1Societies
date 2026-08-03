@@ -1,236 +1,458 @@
-/* 全局基礎樣式 */
+/* =========================================================
+   福瑞斯特中小學．社團線上點名系統
+   Design concept: an official "club registry booklet" —
+   deep forest green + stamped gold seals on warm paper,
+   like a page torn from a real attendance ledger.
+   ========================================================= */
+
+:root {
+  --paper: #FBF7EC;
+  --paper-line: #E5DCC0;
+  --card: #FFFFFF;
+  --ink: #23302A;
+  --ink-soft: #6C7A70;
+  --forest-deep: #163C2C;
+  --forest: #2D6A4F;
+  --forest-soft: #E7F0E6;
+  --gold: #C79A2A;
+  --gold-deep: #9A7A1F;
+  --gold-soft: #F3E7BE;
+  --clay: #B14A3A;
+  --clay-soft: #F6E4DF;
+  --radius-lg: 18px;
+  --radius-md: 12px;
+  --shadow-card: 0 10px 30px -12px rgba(22, 60, 44, 0.22);
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 body {
-  background-color: #f7f9f6;
-  color: #2c3e50;
-  padding: 20px 10px;
+  font-family: "Noto Sans TC", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background-color: var(--paper);
+  color: var(--ink);
+  min-height: 100vh;
+  padding: 32px 16px 56px;
   display: flex;
   justify-content: center;
+  position: relative;
+  overflow-x: hidden;
 }
 
-.container {
+/* ---------- Ambient watercolor washes ---------- */
+.wash {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(60px);
+  z-index: 0;
+  pointer-events: none;
+}
+.wash-1 { width: 380px; height: 380px; top: -140px; left: -120px; background: radial-gradient(circle, rgba(45,106,79,0.20), transparent 70%); }
+.wash-2 { width: 320px; height: 320px; bottom: -100px; right: -100px; background: radial-gradient(circle, rgba(199,154,42,0.22), transparent 70%); }
+.wash-3 { width: 260px; height: 260px; top: 40%; right: -140px; background: radial-gradient(circle, rgba(45,106,79,0.14), transparent 70%); }
+.wash-4 { width: 240px; height: 240px; bottom: 10%; left: -120px; background: radial-gradient(circle, rgba(22,60,44,0.14), transparent 70%); }
+
+/* ---------- Layout ---------- */
+.main-container {
   width: 100%;
-  max-width: 650px;
+  max-width: 640px;
+  position: relative;
+  z-index: 1;
 }
 
-/* 標頭樣式 */
-.header {
+/* ---------- Header ---------- */
+.header-block {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 28px;
 }
 
-.school-title {
-  color: #1b4332;
-  font-size: 1.5rem;
-  font-weight: 800;
+.app-logo {
+  width: 96px;
+  height: auto;
+  margin-bottom: 12px;
+  filter: drop-shadow(0 6px 14px rgba(22, 60, 44, 0.18));
 }
 
-.school-sub {
-  font-size: 0.8rem;
-  color: #666;
-}
-
-.badge {
+.badge-stamp {
   display: inline-block;
-  background-color: #e8f5e9;
-  color: #2e7d32;
-  font-size: 0.75rem;
-  padding: 4px 12px;
+  background: var(--forest-deep);
+  color: var(--gold-soft);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  padding: 6px 16px;
   border-radius: 20px;
-  margin: 10px 0;
-  font-weight: bold;
+  border: 1px solid var(--gold);
+  transform: rotate(-2deg);
+  margin-bottom: 10px;
 }
 
-.system-title {
-  color: #1b4332;
-  font-size: 1.3rem;
+.header-block h4 {
+  font-family: "Noto Serif TC", serif;
+  font-weight: 900;
+  font-size: 1.45rem;
+  color: var(--forest-deep);
+  letter-spacing: 0.02em;
 }
 
-/* 卡片外殼 */
-.card-box {
-  background: #ffffff;
-  border: 1px solid #e0e7ff;
-  border-radius: 16px;
-  padding: 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+/* ---------- Card (ledger page) ---------- */
+.card {
+  background: var(--card);
+  border: 1px solid var(--paper-line);
+  border-radius: var(--radius-lg);
+  padding: 24px 20px 26px;
+  margin-bottom: 22px;
+  box-shadow: var(--shadow-card);
+  position: relative;
 }
 
-.step-title {
-  font-size: 1.1rem;
-  font-weight: bold;
-  color: #2d6a4f;
+.card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 24px;
+  right: 24px;
+  height: 4px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--gold) 0px, var(--gold) 10px,
+    transparent 10px, transparent 20px
+  );
+  border-radius: 0 0 4px 4px;
+}
+
+.step-eyebrow {
   display: flex;
   align-items: center;
-  margin-bottom: 15px;
+  gap: 10px;
+  font-family: "Noto Serif TC", serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--forest-deep);
+  margin-bottom: 18px;
 }
 
-.step-title span {
-  background: #2d6a4f;
-  color: #fff;
-  width: 24px;
-  height: 24px;
+.step-eyebrow .num {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
+  background: var(--forest);
+  color: #fff;
+  border: 2px solid var(--gold);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.85rem;
-  margin-right: 8px;
+  font-size: 0.95rem;
 }
 
-/* 表單與下拉選單 */
-.form-group label {
+/* ---------- Form fields ---------- */
+.form-label {
   display: block;
-  font-size: 0.9rem;
-  font-weight: bold;
-  margin-bottom: 6px;
-  color: #555;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+  letter-spacing: 0.03em;
+  margin-bottom: 7px;
 }
 
 .form-select {
   width: 100%;
-  padding: 12px;
-  border: 1.5px solid #d1d5db;
-  border-radius: 10px;
-  background-color: #fcfbf4;
+  padding: 13px 14px;
+  border: 1.5px solid var(--paper-line);
+  border-radius: var(--radius-md);
+  background-color: var(--paper);
   font-size: 1rem;
-  color: #333;
+  color: var(--ink);
   outline: none;
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--forest) 50%),
+                     linear-gradient(135deg, var(--forest) 50%, transparent 50%);
+  background-position: calc(100% - 20px) center, calc(100% - 15px) center;
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+  transition: border-color 0.15s ease;
 }
 
-/* 社團卡片網格 (Grid) */
-.club-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 12px;
+.form-select:focus {
+  border-color: var(--forest);
 }
 
-.club-card {
-  background: #ffffff;
-  border: 2px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 14px 10px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-align: center;
+#clubSelectContainer {
+  margin-top: 16px;
 }
 
-.club-card:hover {
-  transform: translateY(-2px);
-  border-color: #2d6a4f;
-  box-shadow: 0 4px 10px rgba(45, 106, 79, 0.15);
-}
-
-.club-card.active {
-  background-color: #e8f5e9;
-  border-color: #2d6a4f;
-  box-shadow: 0 0 0 2px #2d6a4f;
-}
-
-.club-card .club-name {
-  font-size: 1rem;
-  font-weight: bold;
-  color: #1b4332;
-  margin-bottom: 6px;
-}
-
-.club-card .club-id {
-  font-size: 0.75rem;
-  color: #666;
-  background: #f0f0f0;
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 10px;
-}
-
-/* 點名表格 */
-.rollcall-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
-}
-
-.rollcall-table th, .rollcall-table td {
-  padding: 10px 8px;
-  text-align: left;
-  border-bottom: 1px solid #eee;
-  font-size: 0.95rem;
-}
-
-.rollcall-table th {
-  background-color: #f8faf8;
-  color: #444;
-}
-
-.rollcall-table label {
-  margin-right: 6px;
-  cursor: pointer;
+/* ---------- Notices ---------- */
+.edit-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--clay-soft);
+  color: var(--clay);
   font-size: 0.85rem;
+  font-weight: 700;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(177, 74, 58, 0.25);
+  margin-bottom: 16px;
 }
 
-/* 簽名畫布 */
-.signature-container {
+/* ---------- Student roll list ---------- */
+#studentList > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 14px 4px;
+  border-bottom: 1px dashed var(--paper-line);
+}
+
+#studentList > div:last-child {
+  border-bottom: none;
+}
+
+.roll-id {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 96px;
+}
+
+.roll-id .seat {
+  font-family: "Noto Serif TC", serif;
+  font-weight: 900;
+  font-size: 0.95rem;
+  color: var(--gold-deep);
+  background: var(--gold-soft);
+  border-radius: 8px;
+  padding: 2px 8px;
+}
+
+.roll-id .name {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--ink);
+}
+
+.status-btn-group {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.status-btn-group input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.status-btn-group label {
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 7px 13px;
+  border-radius: 20px;
+  border: 1.5px solid var(--paper-line);
+  color: var(--ink-soft);
+  background: var(--paper);
+  transition: all 0.15s ease;
+}
+
+.status-btn-group input[value="出席"]:checked + label {
+  background: var(--forest);
+  border-color: var(--forest);
+  color: #fff;
+}
+
+.status-btn-group input[value="請假"]:checked + label {
+  background: var(--gold-soft);
+  border-color: var(--gold);
+  color: var(--gold-deep);
+}
+
+.status-btn-group input[value="缺席"]:checked + label {
+  background: var(--clay-soft);
+  border-color: var(--clay);
+  color: var(--clay);
+}
+
+.status-btn-group input:focus-visible + label {
+  outline: 2px solid var(--forest);
+  outline-offset: 2px;
+}
+
+/* ---------- Signature section ---------- */
+.btn-outline {
+  width: 100%;
+  background: var(--forest-soft);
+  color: var(--forest-deep);
+  border: 1.5px dashed var(--forest);
+  padding: 14px;
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.btn-outline:hover {
+  background: #dcebd9;
+}
+
+.signature-preview-box {
+  border: 1px solid var(--paper-line);
+  border-radius: var(--radius-md);
+  padding: 10px;
+  background: var(--paper);
   text-align: center;
 }
 
-#signatureCanvas {
-  border: 1px dashed #2d6a4f;
-  border-radius: 8px;
-  width: 100%;
-  height: 180px;
-  background-color: #fff;
-  touch-action: none;
+.signature-preview-box img {
+  max-width: 100%;
+  max-height: 140px;
 }
 
-.signature-tools {
-  text-align: right;
-  margin-top: 8px;
-}
-
-/* 按鈕樣式 */
+/* ---------- Buttons ---------- */
 .btn-primary {
   width: 100%;
-  background-color: #2d6a4f;
-  color: white;
+  background: linear-gradient(135deg, var(--forest) 0%, var(--forest-deep) 100%);
+  color: #fff;
   border: none;
-  padding: 14px;
-  border-radius: 10px;
-  font-size: 1.1rem;
-  font-weight: bold;
+  padding: 15px;
+  border-radius: var(--radius-md);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
   cursor: pointer;
-  margin-top: 15px;
+  box-shadow: 0 8px 20px -8px rgba(22, 60, 44, 0.5);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px -8px rgba(22, 60, 44, 0.55);
 }
 
 .btn-primary:disabled {
-  background-color: #a5d6a7;
+  background: #a9c4b4;
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .btn-secondary {
-  background-color: #f1f5f9;
-  color: #475569;
-  border: 1px solid #cbd5e1;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 0.85rem;
+  background: #fff;
+  color: var(--forest-deep);
+  border: 1.5px solid var(--paper-line);
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  font-size: 0.88rem;
+  font-weight: 700;
   cursor: pointer;
 }
 
-/* 提示文字 */
-.loading-text { color: #666; font-size: 0.9rem; text-align: center; }
-.warning-text { color: #d97706; font-size: 0.9rem; text-align: center; }
-.error-text { color: #dc2626; font-size: 0.9rem; text-align: center; }
+.btn-secondary:hover {
+  border-color: var(--forest);
+}
 
+/* ---------- Signature modal ---------- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(22, 60, 44, 0.55);
+  backdrop-filter: blur(2px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 16px;
+}
+
+.modal-overlay.active {
+  display: flex;
+}
+
+body.modal-open {
+  overflow: hidden;
+}
+
+.modal-card {
+  background: var(--paper);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 520px;
+  height: min(80vh, 620px);
+  display: flex;
+  flex-direction: column;
+  padding: 18px;
+  box-shadow: 0 24px 60px -16px rgba(0, 0, 0, 0.4);
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.modal-header h3 {
+  font-family: "Noto Serif TC", serif;
+  font-weight: 700;
+  color: var(--forest-deep);
+  font-size: 1.1rem;
+}
+
+#modal-canvas-container {
+  flex: 1;
+  min-height: 0;
+  border: 1.5px dashed var(--forest);
+  border-radius: var(--radius-md);
+  background: #fff;
+  overflow: hidden;
+}
+
+#modal-signature-pad {
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  display: block;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.modal-actions .btn-secondary {
+  flex: 1;
+}
+
+.modal-actions .btn-primary {
+  flex: 1.4;
+  margin-top: 0;
+}
+
+/* ---------- Footer ---------- */
 .footer {
   text-align: center;
-  color: #888;
-  font-size: 0.85rem;
-  margin-top: 30px;
-  border-top: 1px dashed #ccc;
-  padding-top: 15px;
+  color: var(--ink-soft);
+  font-size: 0.78rem;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px dashed var(--paper-line);
+  letter-spacing: 0.05em;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 420px) {
+  .app-logo { width: 78px; }
+  .header-block h4 { font-size: 1.2rem; }
+  .card { padding: 18px 16px 20px; }
+  .roll-id { min-width: 100%; }
 }
