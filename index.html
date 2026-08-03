@@ -2,103 +2,450 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>福瑞斯特中小學 - 115-1 社團點名系統</title>
-  
-  <!-- 字體引入 -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700;900&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
-  
-  <!-- Signature Pad 手寫簽名套件 -->
-  <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
-  
-  <!-- 引入獨立 CSS 樣式表 -->
-  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>115-1社團線上點名系統</title>
+  <style>
+    :root {
+      --primary-color: #2E5138;
+      --bg-color: #F7F5EC;
+      --card-bg: #FFFFFF;
+      --text-color: #333333;
+      --accent-color: #4A7C59;
+      --border-color: #E2E8F0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .header img {
+      max-width: 220px;
+      height: auto;
+    }
+
+    .badge {
+      background-color: #E8F0E9;
+      color: var(--primary-color);
+      font-size: 0.8rem;
+      font-weight: bold;
+      padding: 4px 12px;
+      border-radius: 12px;
+      display: inline-block;
+      margin-top: 10px;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      color: var(--primary-color);
+      margin: 15px 0 20px 0;
+      text-align: center;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      margin-bottom: 20px;
+      border: 1px solid var(--border-color);
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .card-title .step {
+      background: var(--primary-color);
+      color: white;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      margin-right: 8px;
+    }
+
+    label {
+      font-size: 0.9rem;
+      font-weight: bold;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background-color: #FFFDF6;
+      font-size: 1rem;
+      margin-bottom: 15px;
+      box-sizing: border-box;
+    }
+
+    .student-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .student-info {
+      font-size: 1rem;
+      font-weight: 500;
+    }
+
+    .status-btns {
+      display: flex;
+      gap: 6px;
+    }
+
+    .btn-status {
+      padding: 6px 14px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background: #F8FAFC;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .btn-status.active-present {
+      background: #2E5138;
+      color: white;
+      border-color: #2E5138;
+    }
+
+    .btn-status.active-absent {
+      background: #E53E3E;
+      color: white;
+      border-color: #E53E3E;
+    }
+
+    #canvas {
+      border: 1px dashed var(--primary-color);
+      border-radius: 8px;
+      width: 100%;
+      height: 150px;
+      background: #FAFAFA;
+      touch-action: none;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .footer {
+      text-align: center;
+      font-size: 0.85rem;
+      color: #888;
+      margin-top: 20px;
+    }
+  </style>
 </head>
 <body>
 
-  <!-- 背景水彩暈染裝飾 -->
-  <div class="wash wash-1"></div>
-  <div class="wash wash-2"></div>
-  <div class="wash wash-3"></div>
-  <div class="wash wash-4"></div>
-
-  <div class="main-container">
-    <div class="header-block">
-      <img src="logo.png" alt="福瑞斯特中小學 Logo" class="app-logo" onerror="this.style.display='none'">
-      <span class="badge-stamp">🌿 FORESTRY SCHOOL CLUB</span>
-      <h4>115-1 社團線上點名系統</h4>
+  <div class="container">
+    <div class="header">
+      <div class="badge">🌿 FORESTRY SCHOOL CLUB</div>
+      <h1>115-1 社團線上點名系統</h1>
     </div>
 
-    <!-- 步驟 1: 選擇社團 -->
+    <!-- 步驟 1：選擇社團 -->
     <div class="card">
-      <div class="step-eyebrow"><span class="num">1</span>選擇社團</div>
-      <label class="form-label">選擇學段 / 時間</label>
-      <select id="categorySelect" class="form-select" onchange="filterClubs()">
+      <div class="card-title">
+        <span class="step">1</span> 選擇社團
+      </div>
+      <label>選擇學段 / 時間</label>
+      <select id="categorySelect" onchange="onCategoryChange()">
         <option value="">-- 載入學段列表中... --</option>
       </select>
 
-      <label class="form-label">選擇社團</label>
-      <select id="clubSelect" class="form-select" onchange="loadStudents()" disabled>
+      <label>選擇社團</label>
+      <select id="clubSelect" onchange="onClubChange()" disabled>
         <option value="">-- 請先選擇學段 --</option>
       </select>
     </div>
 
-    <!-- 步驟 2: 學生點名 -->
-    <div id="rollcallSection" class="card" style="display: none;">
-      <div class="step-eyebrow"><span class="num">2</span>學生點名</div>
-      <div id="editNotice" class="edit-notice" style="display: none;">
-        ✏️ 提示：今日已有點名紀錄，以下為剛才勾選的結果，您可以直接更正！
+    <!-- 步驟 2：點名清單 -->
+    <div class="card" id="step2Card" style="display: none;">
+      <div class="card-title">
+        <span class="step">2</span> 學生點名
       </div>
-      <div id="studentList"></div>
+      <div id="studentList">
+        <!-- 動態渲染學生 -->
+      </div>
     </div>
 
-    <!-- 步驟 3: 簽名確認與送出 -->
-    <div id="signatureSection" class="card" style="display: none;">
-      <div class="step-eyebrow"><span class="num">3</span>指導老師簽名確認</div>
-      
-      <button id="openSignatureBtn" class="btn-outline" onclick="openSignatureModal()">
-        🖋️ 點此開啟「全螢幕」手寫簽名
-      </button>
-
-      <div id="signaturePreview" class="signature-preview-box" style="display: none;">
-        <div style="font-size: 0.8rem; color: var(--ink-soft); margin-bottom: 6px;">指導老師親筆簽名：</div>
-        <img id="previewImg" src="" alt="指導老師簽名">
-        <div style="margin-top: 8px;">
-          <button class="btn-secondary" onclick="openSignatureModal()" style="padding: 6px 14px; font-size: 0.8rem;">重新簽名</button>
-        </div>
+    <!-- 步驟 3：老師簽名與送出 -->
+    <div class="card" id="step3Card" style="display: none;">
+      <div class="card-title">
+        <span class="step">3</span> 指導老師簽名
       </div>
-
-      <button id="submitBtn" class="btn-primary" style="margin-top: 16px;" onclick="submitRollcall()">確認送出點名</button>
+      <canvas id="canvas"></canvas>
+      <button style="margin-top: 5px; font-size:0.8rem;" onclick="clearCanvas()">重設簽名</button>
+      <button class="btn-submit" onclick="submitRollcall()">確認並送出點名紀錄</button>
     </div>
 
-    <!-- 頁尾宣告 -->
-    <footer class="footer">
-      <p>製作人：TATA</p>
-    </footer>
-  </div>
-
-  <!-- 固定全螢幕手寫簽名視窗 (Modal) -->
-  <div id="signatureModal" class="modal-overlay">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h3>🖋️ 請指導老師親筆簽名</h3>
-        <span style="font-size: 0.8rem; color: var(--ink-soft);">（請在大框內手寫）</span>
-      </div>
-      
-      <div id="modal-canvas-container">
-        <canvas id="modal-signature-pad"></canvas>
-      </div>
-
-      <div class="modal-actions">
-        <button class="btn-secondary" onclick="clearModalSignature()">🗑️ 重寫</button>
-        <button class="btn-primary" onclick="saveModalSignature()">✅ 完成簽名</button>
-      </div>
+    <div class="footer">
+      製作人：TATA
     </div>
   </div>
 
-  <!-- 引入獨立 JavaScript 檔 -->
-  <script src="script.js"></script>
+  <script>
+    // ⚠️ 請替換為您的 Apps Script Web App URL
+    const API_URL = "https://script.google.com/macros/s/AKfycbxYOUR_SCRIPT_ID_HERE/exec";
+
+    let currentStudents = [];
+    let rollcallState = {}; // { seat: '出席' | '缺席' }
+    let canvas, ctx, isDrawing = false;
+
+    // JSONP 通用請求函式 (完全繞過跨網域阻擋)
+    function fetchJSONP(url) {
+      return new Promise((resolve, reject) => {
+        const callbackName = 'jsonp_cb_' + Math.round(100000 * Math.random());
+        const script = document.createElement('script');
+
+        const timeoutId = setTimeout(() => {
+          cleanUp();
+          reject(new Error("請求超時，請檢查網路連線"));
+        }, 12000);
+
+        function cleanUp() {
+          delete window[callbackName];
+          if (script.parentNode) script.parentNode.removeChild(script);
+          clearTimeout(timeoutId);
+        }
+
+        window[callbackName] = function(data) {
+          cleanUp();
+          resolve(data);
+        };
+
+        script.src = `${url}${url.includes('?') ? '&' : '?'}callback=${callbackName}`;
+        script.onerror = function() {
+          cleanUp();
+          reject(new Error("無法連線至伺服器"));
+        };
+
+        document.body.appendChild(script);
+      });
+    }
+
+    // 初始化頁面：抓取分類
+    window.onload = async function() {
+      initCanvas();
+      try {
+        const categories = await fetchJSONP(`${API_URL}?action=getCategories`);
+        const select = document.getElementById('categorySelect');
+        select.innerHTML = '<option value="">-- 請選擇學段 / 時間 --</option>';
+        categories.forEach(cat => {
+          select.innerHTML += `<option value="${cat}">${cat}</option>`;
+        });
+      } catch (err) {
+        alert("無法讀取分類，請確認網路連線！");
+        document.getElementById('categorySelect').innerHTML = '<option value="">-- 載入失敗 --</option>';
+      }
+    };
+
+    // 分類改變，抓取社團
+    async function onCategoryChange() {
+      const category = document.getElementById('categorySelect').value;
+      const clubSelect = document.getElementById('clubSelect');
+      
+      if (!category) {
+        clubSelect.disabled = true;
+        clubSelect.innerHTML = '<option value="">-- 請先選擇學段 --</option>';
+        return;
+      }
+
+      clubSelect.disabled = false;
+      clubSelect.innerHTML = '<option value="">-- 載入社團名單中... --</option>';
+
+      try {
+        const clubs = await fetchJSONP(`${API_URL}?action=getClubs&category=${encodeURIComponent(category)}`);
+        if (!clubs || clubs.length === 0) {
+          clubSelect.innerHTML = '<option value="">-- 該分類無社團 --</option>';
+          return;
+        }
+
+        clubSelect.innerHTML = '<option value="">-- 請選擇社團 --</option>';
+        clubs.forEach(c => {
+          clubSelect.innerHTML += `<option value="${c.id}">${c.id} - ${c.name}</option>`;
+        });
+      } catch (err) {
+        alert("無法讀取社團清單！");
+        clubSelect.innerHTML = '<option value="">-- 載入失敗 --</option>';
+      }
+    }
+
+    // 社團改變，抓取學生名單
+    async function onClubChange() {
+      const clubId = document.getElementById('clubSelect').value;
+      const step2Card = document.getElementById('step2Card');
+      const step3Card = document.getElementById('step3Card');
+      const studentList = document.getElementById('studentList');
+
+      if (!clubId) {
+        step2Card.style.display = 'none';
+        step3Card.style.display = 'none';
+        return;
+      }
+
+      studentList.innerHTML = '載入學生名單中...';
+      step2Card.style.display = 'block';
+
+      try {
+        const res = await fetchJSONP(`${API_URL}?action=getStudents&clubId=${encodeURIComponent(clubId)}`);
+        currentStudents = res.students || [];
+        rollcallState = res.existingRecords || {};
+
+        if (currentStudents.length === 0) {
+          studentList.innerHTML = '<p style="color:#666;">該社團暫無學生資料。</p>';
+          step3Card.style.display = 'none';
+          return;
+        }
+
+        renderStudents();
+        step3Card.style.display = 'block';
+
+      } catch (err) {
+        alert("載入學生名單失敗！");
+        studentList.innerHTML = '<p style="color:red;">載入失敗，請重試。</p>';
+      }
+    }
+
+    function renderStudents() {
+      const studentList = document.getElementById('studentList');
+      studentList.innerHTML = '';
+
+      currentStudents.forEach(s => {
+        const currentStatus = rollcallState[s.seat] || '出席'; // 預設出席
+        rollcallState[s.seat] = currentStatus;
+
+        const div = document.createElement('div');
+        div.className = 'student-item';
+        div.innerHTML = `
+          <div class="student-info">${s.seat} ${s.name}</div>
+          <div class="status-btns">
+            <button class="btn-status ${currentStatus === '出席' ? 'active-present' : ''}" onclick="setStatus('${s.seat}', '出席')">出席</button>
+            <button class="btn-status ${currentStatus === '缺席' ? 'active-absent' : ''}" onclick="setStatus('${s.seat}', '缺席')">缺席</button>
+          </div>
+        `;
+        studentList.appendChild(div);
+      });
+    }
+
+    function setStatus(seat, status) {
+      rollcallState[seat] = status;
+      renderStudents();
+    }
+
+    // Canvas 簽名板繪製
+    function initCanvas() {
+      canvas = document.getElementById('canvas');
+      ctx = canvas.getContext('2d');
+      canvas.width = canvas.parentElement.clientWidth - 40;
+      canvas.height = 150;
+
+      ctx.strokeStyle = "#000";
+      ctx.lineWidth = 2;
+
+      canvas.addEventListener('mousedown', startDrawing);
+      canvas.addEventListener('mousemove', draw);
+      canvas.addEventListener('mouseup', stopDrawing);
+
+      canvas.addEventListener('touchstart', (e) => startDrawing(e.touches[0]));
+      canvas.addEventListener('touchmove', (e) => draw(e.touches[0]));
+      canvas.addEventListener('touchend', stopDrawing);
+    }
+
+    function startDrawing(e) {
+      isDrawing = true;
+      const rect = canvas.getBoundingClientRect();
+      ctx.beginPath();
+      ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+    }
+
+    function draw(e) {
+      if (!isDrawing) return;
+      const rect = canvas.getBoundingClientRect();
+      ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+      ctx.stroke();
+    }
+
+    function stopDrawing() { isDrawing = false; }
+    function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+
+    // 送出點名紀錄
+    async function submitRollcall() {
+      const clubId = document.getElementById('clubSelect').value;
+      const clubSelect = document.getElementById('clubSelect');
+      const clubName = clubSelect.options[clubSelect.selectedIndex].text;
+      const signature = canvas.toDataURL('image/png');
+
+      const records = currentStudents.map(s => ({
+        seat: s.seat,
+        name: s.name,
+        status: rollcallState[s.seat] || '出席'
+      }));
+
+      const payload = {
+        action: 'saveRollcall',
+        clubId: clubId,
+        clubName: clubName,
+        signature: signature,
+        records: records
+      };
+
+      try {
+        await fetch(API_URL, {
+          method: 'POST',
+          mode: 'no-cors', // 避開限制
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        alert("🎉 點名紀錄已成功送出！");
+      } catch (err) {
+        alert("送出失敗，請確認網路！");
+      }
+    }
+  </script>
 </body>
 </html>
