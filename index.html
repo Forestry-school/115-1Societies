@@ -2,103 +2,74 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>福瑞斯特中小學 - 115-1 社團點名系統</title>
-  
-  <!-- 字體引入 -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@600;700;900&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
-  
-  <!-- Signature Pad 手寫簽名套件 -->
-  <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
-  
-  <!-- 引入獨立 CSS 樣式表 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>福瑞斯特中小學 - 社團線上點名系統</title>
   <link rel="stylesheet" href="style.css">
+  <!-- 引入 SignaturePad 簽名板函式庫 -->
+  <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
 </head>
 <body>
 
-  <!-- 背景水彩暈染裝飾 -->
-  <div class="wash wash-1"></div>
-  <div class="wash wash-2"></div>
-  <div class="wash wash-3"></div>
-  <div class="wash wash-4"></div>
-
-  <div class="main-container">
-    <div class="header-block">
-      <img src="logo.png" alt="福瑞斯特中小學 Logo" class="app-logo" onerror="this.style.display='none'">
-      <span class="badge-stamp">🌿 FORESTRY SCHOOL CLUB</span>
-      <h4>115-1 社團線上點名系統</h4>
-    </div>
-
-    <!-- 步驟 1: 選擇社團 -->
-    <div class="card">
-      <div class="step-eyebrow"><span class="num">1</span>選擇社團</div>
-      <label class="form-label">選擇學段 / 時間</label>
-      <select id="categorySelect" class="form-select" onchange="filterClubs()">
-        <option value="">-- 載入學段列表中... --</option>
-      </select>
-
-      <label class="form-label">選擇社團</label>
-      <select id="clubSelect" class="form-select" onchange="loadStudents()" disabled>
-        <option value="">-- 請先選擇學段 --</option>
-      </select>
-    </div>
-
-    <!-- 步驟 2: 學生點名 -->
-    <div id="rollcallSection" class="card" style="display: none;">
-      <div class="step-eyebrow"><span class="num">2</span>學生點名</div>
-      <div id="editNotice" class="edit-notice" style="display: none;">
-        ✏️ 提示：今日已有點名紀錄，以下為剛才勾選的結果，您可以直接更正！
+  <div class="container">
+    <!-- 標頭 -->
+    <header class="header">
+      <div class="logo-area">
+        <h1 class="school-title">🌲 福瑞斯特中小學</h1>
+        <p class="school-sub">Forestry Elementary and Junior High School</p>
       </div>
-      <div id="studentList"></div>
-    </div>
+      <div class="badge">FORESTRY SCHOOL CLUB</div>
+      <h2 class="system-title">115-1 社團線上點名系統</h2>
+    </header>
 
-    <!-- 步驟 3: 簽名確認與送出 -->
-    <div id="signatureSection" class="card" style="display: none;">
-      <div class="step-eyebrow"><span class="num">3</span>指導老師簽名確認</div>
-      
-      <button id="openSignatureBtn" class="btn-outline" onclick="openSignatureModal()">
-        🖋️ 點此開啟「全螢幕」手寫簽名
-      </button>
+    <!-- 步驟 1：選擇學段/時間 -->
+    <section class="card-box">
+      <div class="step-title"><span>1</span> 選擇學段 / 時間</div>
+      <div class="form-group">
+        <label for="categorySelect">選擇學段 / 時間</label>
+        <select id="categorySelect" class="form-select">
+          <option value="">-- 載入中... --</option>
+        </select>
+      </div>
+    </section>
 
-      <div id="signaturePreview" class="signature-preview-box" style="display: none;">
-        <div style="font-size: 0.8rem; color: var(--ink-soft); margin-bottom: 6px;">指導老師親筆簽名：</div>
-        <img id="previewImg" src="" alt="指導老師簽名">
-        <div style="margin-top: 8px;">
-          <button class="btn-secondary" onclick="openSignatureModal()" style="padding: 6px 14px; font-size: 0.8rem;">重新簽名</button>
+    <!-- 步驟 2：社團卡片列表 (預設隱藏) -->
+    <section id="clubSection" class="card-box" style="display: none;">
+      <div class="step-title"><span>2</span> 選擇社團</div>
+      <div id="clubCardContainer" class="club-grid">
+        <!-- 卡片將由 JS 動態生成 -->
+      </div>
+    </section>
+
+    <!-- 表單包覆：點名表與簽名 -->
+    <form id="rollcallForm">
+      <!-- 步驟 3：學生點名名單 (預設隱藏) -->
+      <section id="rollcallSection" class="card-box" style="display: none;">
+        <div class="step-title"><span>3</span> 學生點名表</div>
+        <div id="studentList">
+          <!-- 點名表格將由 JS 動態生成 -->
         </div>
-      </div>
+      </section>
 
-      <button id="submitBtn" class="btn-primary" style="margin-top: 16px;" onclick="submitRollcall()">確認送出點名</button>
-    </div>
+      <!-- 步驟 4：指導老師簽名 (預設隱藏) -->
+      <section id="signatureSection" class="card-box" style="display: none;">
+        <div class="step-title"><span>4</span> 指導老師簽名</div>
+        <div class="signature-container">
+          <canvas id="signatureCanvas"></canvas>
+          <div class="signature-tools">
+            <button type="button" id="clearSigBtn" class="btn-secondary">清除重簽</button>
+          </div>
+        </div>
+        <div class="submit-area">
+          <button type="submit" id="submitBtn" class="btn-primary">儲存點名紀錄</button>
+        </div>
+      </section>
+    </form>
 
-    <!-- 頁尾宣告 -->
     <footer class="footer">
-      <p>製作人：TATA</p>
+      製作人：TATA
     </footer>
   </div>
 
-  <!-- 固定全螢幕手寫簽名視窗 (Modal) -->
-  <div id="signatureModal" class="modal-overlay">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h3>🖋️ 請指導老師親筆簽名</h3>
-        <span style="font-size: 0.8rem; color: var(--ink-soft);">（請在大框內手寫）</span>
-      </div>
-      
-      <div id="modal-canvas-container">
-        <canvas id="modal-signature-pad"></canvas>
-      </div>
-
-      <div class="modal-actions">
-        <button class="btn-secondary" onclick="clearModalSignature()">🗑️ 重寫</button>
-        <button class="btn-primary" onclick="saveModalSignature()">✅ 完成簽名</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 引入獨立 JavaScript 檔 -->
   <script src="script.js"></script>
 </body>
 </html>
