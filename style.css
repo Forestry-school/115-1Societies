@@ -1,4 +1,4 @@
-/* 全局基礎樣式 */
+/* 全局字體與莫蘭迪米黃色背景 */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -7,8 +7,8 @@
 }
 
 body {
-  background-color: #f7f9f6;
-  color: #2c3e50;
+  background-color: #f7f4ea; /* 經典米黃色底色 */
+  color: #2d4030;
   padding: 20px 10px;
   display: flex;
   justify-content: center;
@@ -16,221 +16,241 @@ body {
 
 .container {
   width: 100%;
-  max-width: 650px;
+  max-width: 520px;
 }
 
-/* 標頭樣式 */
+/* 標頭區塊 */
 .header {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
 }
 
 .school-title {
-  color: #1b4332;
-  font-size: 1.5rem;
+  color: #1e382b;
+  font-size: 1.6rem;
   font-weight: 800;
+  letter-spacing: 1px;
 }
 
 .school-sub {
   font-size: 0.8rem;
-  color: #666;
+  color: #526355;
+  margin-top: 2px;
 }
 
 .badge {
   display: inline-block;
-  background-color: #e8f5e9;
-  color: #2e7d32;
+  background-color: #e2ebd8;
+  color: #2d5032;
   font-size: 0.75rem;
-  padding: 4px 12px;
+  padding: 4px 14px;
   border-radius: 20px;
-  margin: 10px 0;
+  margin: 12px 0 8px 0;
   font-weight: bold;
 }
 
 .system-title {
-  color: #1b4332;
-  font-size: 1.3rem;
+  color: #1e382b;
+  font-size: 1.4rem;
+  font-weight: bold;
 }
 
-/* 卡片外殼 */
+/* 莫蘭迪綠圓角卡片 */
 .card-box {
-  background: #ffffff;
-  border: 1px solid #e0e7ff;
-  border-radius: 16px;
-  padding: 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  background: #f1f5eb; /* 卡片淡綠底色 */
+  border: 1.5px solid #d3e0c7;
+  border-radius: 24px;
+  padding: 22px;
+  margin-bottom: 25px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
 }
 
 .step-title {
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   font-weight: bold;
-  color: #2d6a4f;
+  color: #2a4733;
   display: flex;
   align-items: center;
-  margin-bottom: 15px;
+  margin-bottom: 18px;
 }
 
 .step-title span {
-  background: #2d6a4f;
+  background: #3d6044;
   color: #fff;
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.85rem;
-  margin-right: 8px;
+  font-size: 0.9rem;
+  margin-right: 10px;
 }
 
-/* 表單與下拉選單 */
+/* 下拉選單與卡片 */
+.form-group {
+  margin-bottom: 15px;
+}
+
 .form-group label {
   display: block;
   font-size: 0.9rem;
   font-weight: bold;
-  margin-bottom: 6px;
-  color: #555;
+  margin-bottom: 8px;
+  color: #3b5240;
 }
 
 .form-select {
   width: 100%;
-  padding: 12px;
-  border: 1.5px solid #d1d5db;
-  border-radius: 10px;
-  background-color: #fcfbf4;
+  padding: 12px 16px;
+  border: 2px solid #2a4733;
+  border-radius: 16px;
+  background-color: #f7f4ea;
   font-size: 1rem;
-  color: #333;
+  color: #1e382b;
+  font-weight: bold;
   outline: none;
+  cursor: pointer;
 }
 
-/* 社團卡片網格 (Grid) */
+/* 社團選擇卡片網格 (如果第二層用卡片) */
 .club-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
   gap: 12px;
 }
 
 .club-card {
   background: #ffffff;
-  border: 2px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 14px 10px;
+  border: 2px solid #d3e0c7;
+  border-radius: 16px;
+  padding: 12px 8px;
   cursor: pointer;
   transition: all 0.2s ease;
   text-align: center;
 }
 
-.club-card:hover {
-  transform: translateY(-2px);
-  border-color: #2d6a4f;
-  box-shadow: 0 4px 10px rgba(45, 106, 79, 0.15);
-}
-
-.club-card.active {
-  background-color: #e8f5e9;
-  border-color: #2d6a4f;
-  box-shadow: 0 0 0 2px #2d6a4f;
+.club-card:hover, .club-card.active {
+  border-color: #2a4733;
+  background-color: #e2ebd8;
+  box-shadow: 0 0 0 2px #2a4733;
 }
 
 .club-card .club-name {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: bold;
-  color: #1b4332;
-  margin-bottom: 6px;
+  color: #1e382b;
+  margin-bottom: 4px;
 }
 
 .club-card .club-id {
   font-size: 0.75rem;
-  color: #666;
-  background: #f0f0f0;
+  color: #778879;
+  background: #eae2cf;
   display: inline-block;
   padding: 2px 8px;
   border-radius: 10px;
 }
 
-/* 點名表格 */
-.rollcall-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
+/* 學生點名單列表 (莫蘭迪綠橫條卡片) */
+.student-row {
+  background-color: #dce7d3; /* 學生卡片淡綠底 */
+  border-radius: 20px;
+  padding: 12px 18px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
-.rollcall-table th, .rollcall-table td {
-  padding: 10px 8px;
-  text-align: left;
-  border-bottom: 1px solid #eee;
-  font-size: 0.95rem;
+.student-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-.rollcall-table th {
-  background-color: #f8faf8;
-  color: #444;
+.student-seat {
+  color: #c09168; /* 淡金褐色座號 */
+  font-weight: bold;
+  font-size: 1.05rem;
 }
 
-.rollcall-table label {
-  margin-right: 6px;
-  cursor: pointer;
+.student-name {
+  color: #1e382b;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+/* 出席狀況：膠囊選鈕 */
+.status-group {
+  background: #ffffff;
+  padding: 4px;
+  border-radius: 25px;
+  display: flex;
+  gap: 4px;
+}
+
+.status-btn {
+  padding: 6px 14px;
+  border-radius: 20px;
   font-size: 0.85rem;
+  font-weight: bold;
+  color: #667768;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s;
 }
 
-/* 簽名畫布 */
-.signature-container {
+.status-btn input[type="radio"] {
+  display: none; /* 隱藏原生 radio 按鈕 */
+}
+
+/* 選中時的深綠色膠囊背景 */
+.status-btn.active {
+  background-color: #3b6045;
+  color: #ffffff;
+}
+
+/* 簽名區塊 */
+.signature-box {
+  background-color: #f7f4ea;
+  border: 2px dashed #b2c4a5;
+  border-radius: 16px;
+  padding: 15px;
   text-align: center;
 }
 
 #signatureCanvas {
-  border: 1px dashed #2d6a4f;
-  border-radius: 8px;
   width: 100%;
-  height: 180px;
-  background-color: #fff;
+  height: 160px;
+  background: #ffffff;
+  border-radius: 12px;
   touch-action: none;
 }
 
-.signature-tools {
-  text-align: right;
-  margin-top: 8px;
-}
-
-/* 按鈕樣式 */
+/* 提交按鈕 (深莫蘭迪綠大圓角按鈕) */
 .btn-primary {
   width: 100%;
-  background-color: #2d6a4f;
-  color: white;
+  background-color: #2d4a36;
+  color: #ffffff;
   border: none;
-  padding: 14px;
-  border-radius: 10px;
-  font-size: 1.1rem;
+  padding: 16px;
+  border-radius: 18px;
+  font-size: 1.15rem;
   font-weight: bold;
   cursor: pointer;
   margin-top: 15px;
+  box-shadow: 0 4px 10px rgba(45, 74, 54, 0.2);
+  transition: background-color 0.2s;
 }
 
-.btn-primary:disabled {
-  background-color: #a5d6a7;
+.btn-primary:hover {
+  background-color: #1e382b;
 }
-
-.btn-secondary {
-  background-color: #f1f5f9;
-  color: #475569;
-  border: 1px solid #cbd5e1;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  cursor: pointer;
-}
-
-/* 提示文字 */
-.loading-text { color: #666; font-size: 0.9rem; text-align: center; }
-.warning-text { color: #d97706; font-size: 0.9rem; text-align: center; }
-.error-text { color: #dc2626; font-size: 0.9rem; text-align: center; }
 
 .footer {
   text-align: center;
-  color: #888;
+  color: #8c9e8e;
   font-size: 0.85rem;
   margin-top: 30px;
-  border-top: 1px dashed #ccc;
-  padding-top: 15px;
 }
