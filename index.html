@@ -2,9 +2,8 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>115-1 社團線上點名系統</title>
-  <!-- 請確保 style.css 檔案跟 index.html 在同一個資料夾 -->
   <link rel="stylesheet" href="style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,11 +19,9 @@
 
   <div class="main-container">
     
-    <!-- 標頭區塊 -->
+    <!-- 頁頭標題區塊 -->
     <header class="header-block">
-      <!-- 鎖定 logo 寬度，避免圖片原始解析度過大爆開 -->
-      <img src="logo.png" alt="福瑞斯特中小學校徽" class="app-logo" style="max-width: 260px; width: 80%; height: auto; margin: 0 auto 12px; display: block;">
-      
+      <img src="logo.png" alt="福瑞斯特中小學校徽" class="app-logo">
       <div class="badge-stamp">🍃 FORESTRY SCHOOL CLUB</div>
       <h4>115-1 社團線上點名系統</h4>
     </header>
@@ -40,7 +37,7 @@
         <option value="">-- 載入中... --</option>
       </select>
 
-      <div id="clubSelectContainer" style="display: none; margin-top: 12px;">
+      <div id="clubSelectContainer" style="display: none;">
         <label class="form-label">選擇社團</label>
         <select id="clubSelect" class="form-select" onchange="fetchStudents()">
           <option value="">-- 請選擇社團 --</option>
@@ -58,6 +55,7 @@
         ⚠️ 注意：今天已有點名紀錄，再次儲存將會覆蓋舊紀錄。
       </div>
 
+      <!-- 學生清單動態生成於此 -->
       <div id="studentList"></div>
     </section>
 
@@ -67,16 +65,17 @@
         <span class="num">3</span> 指導老師簽名確認
       </div>
 
-      <div style="text-align: center; margin-bottom: 16px;">
+      <div style="margin-bottom: 16px;">
         <button type="button" class="btn-outline" onclick="openSignatureModal()">
           ✏️ 點此開啟「全螢幕」手寫簽名
         </button>
+
         <div id="signaturePreviewBox" class="signature-preview-box" style="display: none; margin-top: 12px;">
           <img id="signaturePreview" src="" alt="簽名預覽">
         </div>
       </div>
 
-      <button type="button" class="btn-primary" onclick="submitRollcall()">確認送出點名</button>
+      <button type="button" class="btn-primary" onclick="submitRollcall(this)">確認送出點名</button>
     </section>
 
     <footer class="footer">
@@ -85,8 +84,8 @@
 
   </div>
 
-  <!-- 全螢幕手寫簽名 Modal (預設隱藏) -->
-  <div id="signatureModal" class="modal-overlay" style="display: none;">
+  <!-- 全螢幕手寫簽名 Modal (預設隱藏，Class 為 active 時才顯示) -->
+  <div id="signatureModal" class="modal-overlay">
     <div class="modal-card">
       <div class="modal-header">
         <h3>指導老師簽名</h3>
