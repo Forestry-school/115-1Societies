@@ -1,356 +1,236 @@
-:root {
-  --paper: #FBF7EE;
-  --card: #FFFDF7;
-  --ink: #3A3126;
-  --ink-soft: #8A7D66;
-  --green: #4C7A57;
-  --green-deep: #2E5138;
-  --green-wash: #C7DFBE;
-  --green-wash-soft: #DCEBD4;
-  --sand: #E8D9AE;
-  --sand-tint: #F6EED4;
-  --clay: #D98F6B;
-  --clay-tint: #F4DECE;
-  --sky: #A9CBD6;
-  --sky-tint: #E4F0F2;
-  --moss: #7C9B6C;
-  --radius-blob: 42px 18px 40px 16px / 18px 38px 16px 40px;
-  --shadow: 0 14px 28px -16px rgba(46, 81, 56, 0.35);
-}
-
-* { box-sizing: border-box; }
-
-html, body {
-  width: 100%;
-  overflow-x: hidden;
-  background: var(--paper);
-  font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
-  color: var(--ink);
-  position: relative;
+/* 全局基礎樣式 */
+* {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
-body.modal-open {
-  overflow: hidden !important;
-  position: fixed;
+body {
+  background-color: #f7f9f6;
+  color: #2c3e50;
+  padding: 20px 10px;
+  display: flex;
+  justify-content: center;
+}
+
+.container {
   width: 100%;
-  height: 100%;
+  max-width: 650px;
 }
 
-/* 背景水彩暈染 */
-.wash {
-  position: fixed;
+/* 標頭樣式 */
+.header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.school-title {
+  color: #1b4332;
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+
+.school-sub {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.badge {
+  display: inline-block;
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  font-size: 0.75rem;
+  padding: 4px 12px;
+  border-radius: 20px;
+  margin: 10px 0;
+  font-weight: bold;
+}
+
+.system-title {
+  color: #1b4332;
+  font-size: 1.3rem;
+}
+
+/* 卡片外殼 */
+.card-box {
+  background: #ffffff;
+  border: 1px solid #e0e7ff;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.step-title {
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #2d6a4f;
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.step-title span {
+  background: #2d6a4f;
+  color: #fff;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
-  filter: blur(18px);
-  opacity: 0.45;
-  z-index: 0;
-  pointer-events: none;
-  mix-blend-mode: multiply;
-}
-.wash-1 { width: 260px; height: 260px; background: var(--green-wash); top: -90px; left: -80px; transform: rotate(8deg); }
-.wash-2 { width: 180px; height: 180px; background: var(--sky); top: 140px; right: -70px; opacity: 0.35; }
-.wash-3 { width: 220px; height: 220px; background: var(--sand); bottom: 60px; left: -90px; opacity: 0.4; }
-.wash-4 { width: 160px; height: 160px; background: var(--clay-tint); bottom: -60px; right: -50px; opacity: 0.45; }
-
-.main-container {
-  position: relative;
-  z-index: 1;
-  max-width: 500px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 30px 18px 60px;
-}
-
-.header-block { text-align: center; margin-bottom: 24px; position: relative; }
-
-.header-block .app-logo {
-  width: 80%;
-  max-width: 260px;
-  height: auto;
-  display: block;
-  margin: 0 auto 12px;
-}
-
-.header-block .badge-stamp {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-family: "Noto Sans TC", sans-serif;
-  font-weight: 700;
-  font-size: 0.7rem;
-  letter-spacing: 0.08em;
-  color: var(--green-deep);
-  background: var(--green-wash-soft);
-  padding: 5px 14px;
-  border-radius: 999px;
-  margin-bottom: 10px;
-}
-
-.header-block h4 {
-  font-family: "Noto Serif TC", serif;
-  font-weight: 900;
-  font-size: 1.7rem;
-  margin: 0 0 6px;
-  color: var(--green-deep);
-  line-height: 1.35;
-}
-
-.card {
-  background: var(--card);
-  border-radius: var(--radius-blob);
-  box-shadow: var(--shadow);
-  border: 1.5px solid var(--green-wash);
-  padding: 24px 20px;
-  margin-bottom: 20px;
-  position: relative;
-}
-
-.step-eyebrow {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: 700;
-  font-size: 0.95rem;
-  color: var(--green-deep);
-  margin-bottom: 16px;
-}
-
-.step-eyebrow .num {
-  width: 30px;
-  height: 30px;
-  border-radius: 60% 40% 55% 45% / 45% 55% 40% 60%;
-  background: var(--green);
-  color: #fff;
-  display: flex;
-  align-items: center;
   justify-content: center;
-  font-family: "Noto Serif TC", serif;
-  font-weight: 700;
-  font-size: 0.95rem;
-  flex-shrink: 0;
-}
-
-.form-label {
-  display: block;
-  font-weight: 700;
-  font-size: 0.88rem;
-  margin: 0 0 8px;
-  color: var(--ink);
-}
-
-select.form-select {
-  width: 100%;
-  appearance: none;
-  -webkit-appearance: none;
-  background: var(--sand-tint) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'><path d='M1 1L7 7L13 1' stroke='%232E5138' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>") no-repeat right 16px center;
-  border: 2px solid var(--green-wash);
-  border-radius: 16px;
-  padding: 13px 40px 13px 16px;
-  font-size: 1rem;
-  font-family: inherit;
-  color: var(--ink);
-  margin-bottom: 16px;
-}
-select.form-select:disabled { opacity: 0.5; }
-
-/* 提示標籤 */
-.edit-notice {
-  background: #FFF4E5;
-  border: 1.5px solid #FFE0B2;
-  color: #B78103;
-  padding: 10px 14px;
-  border-radius: 12px;
   font-size: 0.85rem;
-  font-weight: 700;
-  margin-bottom: 12px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-#studentList { display: flex; flex-direction: column; gap: 10px; }
-
-#studentList > div {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-  background: var(--green-wash-soft);
-  border-radius: 40% 12% 38% 14% / 14% 40% 12% 38%;
-  padding: 12px 16px;
-}
-
-#studentList .roll-id {
-  font-weight: 700;
-  font-size: 1.06rem;
-  color: var(--ink);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-#studentList .roll-id .seat {
-  font-family: "Noto Serif TC", serif;
-  font-weight: 700;
-  font-size: 1.05rem;
-  color: var(--clay);
   margin-right: 8px;
 }
 
-.status-btn-group {
-  display: inline-flex;
-  background: #fff;
-  border-radius: 999px;
-  padding: 3px;
-  gap: 2px;
-  box-shadow: inset 0 0 0 1.5px var(--green-wash);
-  flex-shrink: 0;
+/* 表單與下拉選單 */
+.form-group label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: bold;
+  margin-bottom: 6px;
+  color: #555;
 }
-.status-btn-group input[type="radio"] { display: none; }
-.status-btn-group label {
-  padding: 7px 12px;
-  border-radius: 999px;
-  cursor: pointer;
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--ink-soft);
-  transition: all 0.15s ease;
-}
-.status-btn-group input[value="出席"]:checked + label { background: var(--green); color: #fff; }
-.status-btn-group input[value="請假"]:checked + label { background: var(--sand); color: #5A4200; }
-.status-btn-group input[value="缺席"]:checked + label { background: var(--clay); color: #fff; }
 
-button {
-  font-family: inherit;
-  border: none;
-  cursor: pointer;
-  font-weight: 700;
-  border-radius: 16px;
-  transition: transform 0.1s ease;
+.form-select {
+  width: 100%;
+  padding: 12px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 10px;
+  background-color: #fcfbf4;
+  font-size: 1rem;
+  color: #333;
+  outline: none;
 }
-button:active { transform: scale(0.97); }
 
+/* 社團卡片網格 (Grid) */
+.club-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.club-card {
+  background: #ffffff;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 14px 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.club-card:hover {
+  transform: translateY(-2px);
+  border-color: #2d6a4f;
+  box-shadow: 0 4px 10px rgba(45, 106, 79, 0.15);
+}
+
+.club-card.active {
+  background-color: #e8f5e9;
+  border-color: #2d6a4f;
+  box-shadow: 0 0 0 2px #2d6a4f;
+}
+
+.club-card .club-name {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #1b4332;
+  margin-bottom: 6px;
+}
+
+.club-card .club-id {
+  font-size: 0.75rem;
+  color: #666;
+  background: #f0f0f0;
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+/* 點名表格 */
+.rollcall-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.rollcall-table th, .rollcall-table td {
+  padding: 10px 8px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+  font-size: 0.95rem;
+}
+
+.rollcall-table th {
+  background-color: #f8faf8;
+  color: #444;
+}
+
+.rollcall-table label {
+  margin-right: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+/* 簽名畫布 */
+.signature-container {
+  text-align: center;
+}
+
+#signatureCanvas {
+  border: 1px dashed #2d6a4f;
+  border-radius: 8px;
+  width: 100%;
+  height: 180px;
+  background-color: #fff;
+  touch-action: none;
+}
+
+.signature-tools {
+  text-align: right;
+  margin-top: 8px;
+}
+
+/* 按鈕樣式 */
 .btn-primary {
   width: 100%;
-  background: var(--green-deep);
-  color: #fff;
-  padding: 14px 16px;
-  font-size: 1rem;
-  font-family: "Noto Serif TC", serif;
-  letter-spacing: 0.02em;
-  box-shadow: 0 8px 18px -6px rgba(46, 81, 56, 0.5);
+  background-color: #2d6a4f;
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 15px;
 }
 
-.btn-outline {
-  width: 100%;
-  background: var(--sand-tint);
-  border: 2px dashed var(--clay);
-  color: var(--green-deep);
-  padding: 16px;
-  font-size: 1rem;
-  border-radius: 36px 12px 34px 12px / 12px 34px 12px 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
+.btn-primary:disabled {
+  background-color: #a5d6a7;
 }
 
 .btn-secondary {
-  background: var(--green-wash-soft);
-  color: var(--green-deep);
-  padding: 12px 20px;
-  font-size: 0.9rem;
+  background-color: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
 }
 
-.signature-preview-box {
-  border: 2px solid var(--green-wash);
-  border-radius: 20px;
-  padding: 12px;
-  background: #FEFCF6;
-  text-align: center;
-  margin-bottom: 16px;
-}
-.signature-preview-box img {
-  max-width: 100%;
-  height: 100px;
-  object-fit: contain;
-}
+/* 提示文字 */
+.loading-text { color: #666; font-size: 0.9rem; text-align: center; }
+.warning-text { color: #d97706; font-size: 0.9rem; text-align: center; }
+.error-text { color: #dc2626; font-size: 0.9rem; text-align: center; }
 
-/* 全螢幕 Modal */
-.modal-overlay {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  width: 100vw;
-  height: 100vh;
-  background: var(--paper);
-  z-index: 99999;
-  display: none;
-  flex-direction: column;
-  padding: 0;
-  margin: 0;
-  overflow: hidden;
-  touch-action: none;
-}
-.modal-overlay.active { display: flex; }
-
-.modal-card {
-  background: var(--paper);
-  width: 100%;
-  height: 100%;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  touch-action: none;
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 4px;
-  flex-shrink: 0;
-}
-.modal-header h3 {
-  margin: 0;
-  font-size: 1.2rem;
-  color: var(--green-deep);
-  font-family: "Noto Serif TC", serif;
-  font-weight: 700;
-}
-
-#modal-canvas-container {
-  flex: 1;
-  width: 100%;
-  border: 2.5px dashed var(--green-wash);
-  border-radius: 20px;
-  background: #fff;
-  position: relative;
-  overflow: hidden;
-  touch-action: none;
-}
-
-#modal-signature-pad {
-  width: 100%;
-  height: 100%;
-  display: block;
-  touch-action: none;
-}
-
-.modal-actions {
-  display: flex;
-  gap: 12px;
-  flex-shrink: 0;
-  padding-bottom: env(safe-area-inset-bottom, 8px);
-}
-.modal-actions button { flex: 1; padding: 14px; font-size: 1rem; }
-
-/* 頁尾樣式 */
 .footer {
   text-align: center;
-  padding: 20px 0 10px;
-  margin-top: 30px;
-  color: var(--ink-soft);
+  color: #888;
   font-size: 0.85rem;
-  border-top: 1.5px dashed var(--green-wash);
+  margin-top: 30px;
+  border-top: 1px dashed #ccc;
+  padding-top: 15px;
 }
