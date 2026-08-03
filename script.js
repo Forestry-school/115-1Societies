@@ -1,4 +1,4 @@
-// Apps Script 網址
+// Apps Script API 網址
 const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyGrdJ8j-neGtzjsc4BXOVybWgBqtjjVsfKdxs2rh7spU6udfSXlj6grbstCaNK9XGR/exec";
 
 let currentSignatureData = "";
@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", function() {
   initCanvas();
 });
 
-// 1. 載入第一層：學段選單
+// 1. 載入第一層選單：學段 / 時間
 function loadCategories() {
   const categorySelect = document.getElementById("categorySelect");
   
@@ -22,22 +22,21 @@ function loadCategories() {
           categorySelect.innerHTML += `<option value="${cat}">${cat}</option>`;
         });
       } else {
-        categorySelect.innerHTML = '<option value="">載入失敗，請重新整理</option>';
+        categorySelect.innerHTML = '<option value="">載入失敗</option>';
       }
     })
     .catch(err => {
       console.error(err);
-      categorySelect.innerHTML = '<option value="">載入失敗，請確認網路</option>';
+      categorySelect.innerHTML = '<option value="">網路連線失敗</option>';
     });
 }
 
-// 2. 選擇學段後載入社團清單
+// 2. 選擇學段後載入社團
 function fetchClubCards() {
   const category = document.getElementById("categorySelect").value;
   const clubSelectContainer = document.getElementById("clubSelectContainer");
   const clubSelect = document.getElementById("clubSelect");
   
-  // 隱藏後續區塊
   document.getElementById("studentSection").style.display = "none";
   document.getElementById("signatureSection").style.display = "none";
 
@@ -58,7 +57,7 @@ function fetchClubCards() {
           clubSelect.innerHTML += `<option value="${c.id}">${c.name} (${c.id})</option>`;
         });
       } else {
-        clubSelect.innerHTML = '<option value="">此學段暫無社團</option>';
+        clubSelect.innerHTML = '<option value="">此學段無社團</option>';
       }
     })
     .catch(err => {
@@ -67,7 +66,7 @@ function fetchClubCards() {
     });
 }
 
-// 3. 選擇社團後載入學生名單
+// 3. 選擇社團後載入學生名單 (完美套用繪本風清單結構)
 function fetchStudents() {
   const clubSelect = document.getElementById("clubSelect");
   const clubId = clubSelect.value;
@@ -82,7 +81,7 @@ function fetchStudents() {
     return;
   }
 
-  studentList.innerHTML = '<p style="text-align:center; padding:20px;">載入學生名單中...</p>';
+  studentList.innerHTML = '<p style="text-align:center; padding:20px; color:var(--ink-soft);">載入學生名單中...</p>';
   studentSection.style.display = "block";
 
   fetch(`${GAS_WEB_APP_URL}?action=getStudents&clubId=${encodeURIComponent(clubId)}`, { redirect: "follow" })
@@ -93,19 +92,15 @@ function fetchStudents() {
       const existingSignature = data.existingSignature || "";
 
       if (students.length === 0) {
-        studentList.innerHTML = '<p style="text-align:center; padding:20px;">此社團無學生名單。</p>';
+        studentList.innerHTML = '<p style="text-align:center; padding:20px; color:var(--ink-soft);">此社團無學生名單。</p>';
         signatureSection.style.display = "none";
         return;
       }
 
-      // 是否有今日舊紀錄
-      if (Object.keys(existingRecords).length > 0) {
-        editNotice.style.display = "flex";
-      } else {
-        editNotice.style.display = "none";
-      }
+      // 是否提示已點過名
+      editNotice.style.display = Object.keys(existingRecords).length > 0 ? "flex" : "none";
 
-      // 渲染學生點名列表（完全套用你原版的 HTML 標籤架構）
+      // 動態生成手繪風橫條
       let html = "";
       students.forEach(s => {
         const status = existingRecords[s.seat] || "出席";
@@ -130,40 +125,28 @@ function fetchStudents() {
       });
       studentList.innerHTML = html;
 
-      // 載入簽名
+      // 復原老師簽名
       if (existingSignature) {
         currentSignatureData = existingSignature;
+        const previewBox = document.getElementById("signaturePreviewBox");
         const img = document.getElementById("signaturePreview");
         img.src = existingSignature;
-        img.style.display = "block";
+        previewBox.style.display = "block";
       }
 
       signatureSection.style.display = "block";
     })
     .catch(err => {
       console.error(err);
-      studentList.innerHTML = '<p style="text-align:center; color:red;">學生名單載入失敗</p>';
+      studentList.innerHTML = '<p style="text-align:center; color:var(--clay);">學生名單載入失敗</p>';
     });
 }
 
-// 4. 全螢幕簽名畫布控制
+// 4. 手寫簽名板控制 (適應手機與電腦)
 function initCanvas() {
   canvas = document.getElementById("modal-signature-pad");
   if (!canvas) return;
   ctx = canvas.getContext("2d");
-
-  function resizeCanvas() {
-    const container = document.getElementById("modal-canvas-container");
-    if (container && container.clientWidth) {
-      canvas.width = container.clientWidth;
-      canvas.height = container.clientHeight || 250;
-      ctx.lineWidth = 3;
-      ctx.lineCap = "round";
-      ctx.strokeStyle = "#2E5138";
-    }
-  }
-
-  window.addEventListener("resize", resizeCanvas);
 
   function getPos(e) {
     const rect = canvas.getBoundingClientRect();
@@ -201,13 +184,14 @@ function initCanvas() {
 function openSignatureModal() {
   document.getElementById("signatureModal").classList.add("active");
   document.body.classList.add("modal-open");
+  
   setTimeout(() => {
     const container = document.getElementById("modal-canvas-container");
     canvas.width = container.clientWidth;
     canvas.height = container.clientHeight || 250;
     ctx.lineWidth = 3;
     ctx.lineCap = "round";
-    ctx.strokeStyle = "#2E5138";
+    ctx.strokeStyle = "#2E5138"; // 深綠色筆觸
   }, 100);
 }
 
@@ -222,13 +206,14 @@ function clearCanvas() {
 
 function saveSignature() {
   currentSignatureData = canvas.toDataURL("image/png");
+  const previewBox = document.getElementById("signaturePreviewBox");
   const img = document.getElementById("signaturePreview");
   img.src = currentSignatureData;
-  img.style.display = "block";
+  previewBox.style.display = "block";
   closeSignatureModal();
 }
 
-// 5. 儲存點名結果
+// 5. 點名結果送出
 function submitRollcall() {
   const clubSelect = document.getElementById("clubSelect");
   const clubId = clubSelect.value;
