@@ -2,7 +2,7 @@
 // 1. 設定與全域變數
 // ==========================================
 // ⚠️ 請確認下方 URL 為您 Apps Script 最新部署的 Web App URL
-const GAS_WEB_APP_URL = "https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec";
+const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyGrdJ8j-neGtzjsc4BXOVybWgBqtjjVsfKdxs2rh7spU6udfSXlj6grbstCaNK9XGR/exec";
 
 let currentStudents = []; // 儲存當前社團的學生名單
 let signaturePad = null;  // 簽名板實例
