@@ -1,15 +1,46 @@
-/* 全局重置與米黃色繪本風格背景 */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
+
+/* ===================================================
+   設計語彙：森林巡查員的野帳 (Forest Ranger's Field Ledger)
+   色票 / Tokens
+=================================================== */
+:root {
+  --paper: #f6f1e3;         /* 野帳紙色 */
+  --paper-dot: #e3d8bd;     /* 紙張網格點 */
+  --card: #eef1e3;          /* 卡片底色（苔綠） */
+  --card-line: #cddab8;     /* 卡片邊線 */
+  --cream-white: #fffdf7;   /* 輸入框底色 */
+
+  --ink: #1d2c22;           /* 主文字（深林墨綠） */
+  --forest: #2e4f35;        /* 主色：森林綠 */
+  --forest-deep: #1a3223;   /* 深色 hover 態 */
+  --moss: #6d8f5c;          /* 次要綠 */
+  --bark: #8a5f3b;          /* 樹皮棕：座號、資訊點綴 */
+  --bark-light: #c79f6e;    /* 淺樹皮 */
+  --amber: #b9812b;         /* 蜜蠟琥珀：請假 / 強調 */
+  --rust: #a94e30;          /* 赤陶／缺席 */
+  --muted: #6d7a6a;         /* 輔助文字 */
+
+  --radius-lg: 22px;
+  --radius-md: 16px;
+  --radius-sm: 12px;
+}
+
+/* 全局重置與野帳紙質背景 */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: "Noto Sans TC", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 body {
-  background-color: #f8f5eb; /* 質感米黃背景 */
-  color: #2b3e30;
-  padding: 24px 12px;
+  background-color: var(--paper);
+  background-image:
+    radial-gradient(var(--paper-dot) 1px, transparent 1px);
+  background-size: 22px 22px;
+  color: var(--ink);
+  padding: 32px 14px 60px;
   display: flex;
   justify-content: center;
 }
@@ -19,10 +50,12 @@ body {
   max-width: 500px;
 }
 
-/* 標頭區塊 */
+/* ===================================================
+   標頭區塊
+=================================================== */
 .header {
   text-align: center;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 
 .logo-area {
@@ -36,104 +69,149 @@ body {
   width: 60px;
   height: 60px;
   object-fit: contain;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
+  filter: drop-shadow(0 3px 6px rgba(26, 50, 34, 0.18));
 }
 
 .school-title {
-  color: #1e382b;
-  font-size: 1.55rem;
-  font-weight: 800;
-  letter-spacing: 1px;
+  font-family: "Noto Serif TC", serif;
+  color: var(--forest-deep);
+  font-size: 1.6rem;
+  font-weight: 900;
+  letter-spacing: 2px;
 }
 
 .school-sub {
-  font-size: 0.78rem;
-  color: #5d6f60;
-  margin-top: 2px;
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin-top: 3px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
 }
 
+/* 徽章：緞帶造型，取代普通藥丸標籤 */
 .badge {
   display: inline-block;
-  background-color: #e2ebd8;
-  color: #2b4e31;
+  background-color: var(--forest);
+  color: var(--paper);
   font-size: 0.72rem;
-  padding: 4px 14px;
-  border-radius: 20px;
-  margin: 12px 0 8px 0;
+  padding: 6px 22px;
+  margin: 16px 0 10px 0;
   font-weight: bold;
-  letter-spacing: 0.5px;
+  letter-spacing: 1px;
+  clip-path: polygon(5% 0%, 95% 0%, 100% 50%, 95% 100%, 5% 100%, 0% 50%);
 }
 
 .system-title {
-  color: #1e382b;
-  font-size: 1.35rem;
-  font-weight: bold;
+  font-family: "Noto Serif TC", serif;
+  color: var(--forest-deep);
+  font-size: 1.4rem;
+  font-weight: 700;
+  position: relative;
+  display: inline-block;
+  padding-bottom: 10px;
 }
 
-/* 莫蘭迪綠圓角卡片 */
+.system-title::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 3px;
+  background: var(--bark-light);
+  border-radius: 2px;
+}
+
+/* ===================================================
+   卡片：野帳頁面
+=================================================== */
 .card-box {
-  background: #f1f5ea; /* 淡綠色卡片底 */
-  border: 1.5px solid #d4e1c8;
-  border-radius: 24px;
-  padding: 20px;
+  background: var(--card);
+  border: 1.5px solid var(--card-line);
+  border-radius: var(--radius-lg);
+  padding: 22px 20px;
   margin-bottom: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.015);
+  box-shadow: 0 6px 16px rgba(29, 44, 34, 0.06);
 }
 
 .step-title {
-  font-size: 1.1rem;
-  font-weight: bold;
-  color: #213c2b;
+  font-family: "Noto Serif TC", serif;
+  font-size: 1.08rem;
+  font-weight: 700;
+  color: var(--forest-deep);
   display: flex;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
 }
 
+/* 簽名式徽記：年輪，取代單色圓形數字 */
 .step-title span {
-  background: #3b5e43;
-  color: #ffffff;
+  background: var(--bark);
+  color: var(--cream-white);
   width: 26px;
   height: 26px;
   border-radius: 50%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.88rem;
-  margin-right: 10px;
+  font-family: "Noto Serif TC", serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin: 3px 20px 3px 3px;
+  box-shadow:
+    0 0 0 3px var(--card),
+    0 0 0 5px var(--moss),
+    0 0 0 7px var(--card),
+    0 0 0 9px var(--bark-light);
 }
 
-/* 下拉選單 */
+/* ===================================================
+   下拉選單
+=================================================== */
 .form-group {
   margin-bottom: 14px;
 }
 
 .form-group label {
   display: block;
-  font-size: 0.88rem;
+  font-size: 0.86rem;
   font-weight: bold;
   margin-bottom: 8px;
-  color: #3b5240;
+  color: var(--forest);
 }
 
 .form-select {
   width: 100%;
   padding: 12px 16px;
-  border: 2px solid #2a4733;
-  border-radius: 16px;
-  background-color: #f8f5eb;
+  border: 2px solid var(--forest);
+  border-radius: var(--radius-md);
+  background-color: var(--cream-white);
   font-size: 0.98rem;
-  color: #1e382b;
+  color: var(--ink);
   font-weight: bold;
   outline: none;
   cursor: pointer;
   appearance: none;
-  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%232A4733%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%232e4f35%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
   background-repeat: no-repeat;
   background-position: right 16px top 50%;
   background-size: 12px auto;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-/* 卡片選擇模式 (若使用社團卡片) */
+.form-select:hover {
+  border-color: var(--forest-deep);
+}
+
+.form-select:focus-visible {
+  box-shadow: 0 0 0 3px rgba(46, 79, 53, 0.25);
+}
+
+/* ===================================================
+   社團卡片選擇模式
+=================================================== */
 .club-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
@@ -141,45 +219,59 @@ body {
 }
 
 .club-card {
-  background: #ffffff;
-  border: 2px solid #d4e1c8;
-  border-radius: 16px;
+  background: var(--cream-white);
+  border: 2px solid var(--card-line);
+  border-radius: var(--radius-md);
   padding: 12px 8px;
   cursor: pointer;
   text-align: center;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.15s ease;
 }
 
-.club-card:hover, .club-card.active {
-  border-color: #2a4733;
-  background-color: #e2ebd8;
+.club-card:hover {
+  border-color: var(--moss);
+  transform: translateY(-1px);
+}
+
+.club-card.active {
+  border-color: var(--forest);
+  background-color: var(--card);
 }
 
 .club-card .club-name {
   font-size: 0.95rem;
   font-weight: bold;
-  color: #1e382b;
+  color: var(--forest-deep);
 }
 
 .club-card .club-id {
-  font-size: 0.75rem;
-  color: #6b7c6d;
-  background: #ebd8c0;
+  font-size: 0.72rem;
+  color: var(--cream-white);
+  background: var(--bark);
   display: inline-block;
-  padding: 2px 8px;
+  padding: 2px 9px;
   border-radius: 10px;
-  margin-top: 4px;
+  margin-top: 5px;
+  font-weight: 600;
 }
 
-/* 學生點名單 (莫蘭迪綠橫條) */
+/* ===================================================
+   學生點名單
+=================================================== */
 .student-row {
-  background-color: #dce7d2; /* 橫條綠底 */
-  border-radius: 20px;
-  padding: 10px 16px;
+  background-color: var(--cream-white);
+  border: 1px solid var(--card-line);
+  border-radius: var(--radius-md);
+  padding: 11px 16px;
   margin-bottom: 10px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  transition: box-shadow 0.15s ease;
+}
+
+.student-row:hover {
+  box-shadow: 0 3px 10px rgba(29, 44, 34, 0.07);
 }
 
 .student-info {
@@ -189,20 +281,25 @@ body {
 }
 
 .student-seat {
-  color: #ba8c63; /* 金褐色座號 */
+  color: var(--cream-white);
+  background-color: var(--bark);
   font-weight: bold;
-  font-size: 1.05rem;
+  font-size: 0.82rem;
+  padding: 3px 8px;
+  border-radius: 8px;
+  font-variant-numeric: tabular-nums;
 }
 
 .student-name {
-  color: #1e382b;
+  color: var(--ink);
   font-weight: bold;
-  font-size: 1.05rem;
+  font-size: 1.02rem;
 }
 
-/* 出席狀況：白色膠囊選區 */
+/* 出席狀況：白底膠囊選區，三態分色一目了然 */
 .status-group {
   background: #ffffff;
+  border: 1px solid var(--card-line);
   padding: 3px;
   border-radius: 22px;
   display: flex;
@@ -212,41 +309,61 @@ body {
 .status-btn {
   padding: 5px 12px;
   border-radius: 18px;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: bold;
-  color: #627264;
+  color: var(--muted);
   cursor: pointer;
   user-select: none;
-  transition: all 0.2s ease;
+  transition: all 0.18s ease;
+}
+
+.status-btn:hover {
+  background-color: var(--card);
 }
 
 .status-btn input[type="radio"] {
   display: none;
 }
 
-/* 選中時填滿深綠色 */
+/* 預設選中色：森林綠 */
 .status-btn.active {
-  background-color: #3b6045;
+  background-color: var(--forest);
   color: #ffffff;
 }
 
-/* 簽名區塊 */
+/* 依序對應 出席 / 請假 / 缺席 三種狀態色 */
+.status-group .status-btn:nth-child(1).active {
+  background-color: var(--forest);
+}
+
+.status-group .status-btn:nth-child(2).active {
+  background-color: var(--amber);
+}
+
+.status-group .status-btn:nth-child(3).active {
+  background-color: var(--rust);
+}
+
+/* ===================================================
+   簽名區塊
+=================================================== */
 .signature-box {
-  background-color: #f8f5eb;
-  border: 2px dashed #b2c4a5;
-  border-radius: 16px;
-  padding: 18px;
+  background-color: var(--paper);
+  border: 2px dashed var(--bark-light);
+  border-radius: var(--radius-md);
+  padding: 20px 18px;
   text-align: center;
   cursor: pointer;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
 }
 
 .signature-box:hover {
-  border-color: #2a4733;
+  border-color: var(--forest);
+  background-color: var(--card);
 }
 
 .signature-prompt {
-  color: #2a4733;
+  color: var(--forest);
   font-weight: bold;
   font-size: 0.95rem;
 }
@@ -257,34 +374,44 @@ body {
   object-fit: contain;
 }
 
-/* 按鈕樣式 */
+/* ===================================================
+   按鈕
+=================================================== */
 .btn-primary {
   width: 100%;
-  background-color: #2d4a36;
+  background-color: var(--forest);
   color: #ffffff;
   border: none;
   padding: 15px;
-  border-radius: 18px;
-  font-size: 1.1rem;
+  border-radius: var(--radius-md);
+  font-size: 1.08rem;
   font-weight: bold;
+  letter-spacing: 1px;
   cursor: pointer;
-  margin-top: 16px;
-  box-shadow: 0 4px 10px rgba(45, 74, 54, 0.15);
-  transition: background-color 0.2s;
+  margin-top: 18px;
+  box-shadow: 0 5px 12px rgba(46, 79, 53, 0.22);
+  transition: background-color 0.2s ease, transform 0.1s ease;
 }
 
 .btn-primary:hover {
-  background-color: #1e382b;
+  background-color: var(--forest-deep);
+}
+
+.btn-primary:active {
+  transform: translateY(1px);
 }
 
 .footer {
   text-align: center;
-  color: #8c9e8e;
-  font-size: 0.82rem;
-  margin-top: 24px;
+  color: var(--muted);
+  font-size: 0.8rem;
+  margin-top: 26px;
+  letter-spacing: 0.5px;
 }
 
-/* 全螢幕簽名彈窗 Modal 樣式 */
+/* ===================================================
+   全螢幕簽名彈窗 Modal
+=================================================== */
 .modal {
   display: none;
   position: fixed;
@@ -292,30 +419,31 @@ body {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(26, 50, 34, 0.55);
   z-index: 1000;
   justify-content: center;
   align-items: center;
 }
 
 .modal-content {
-  background-color: #f8f5eb;
+  background-color: var(--paper);
   width: 90%;
   max-width: 500px;
-  border-radius: 20px;
-  padding: 20px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  border-radius: var(--radius-lg);
+  padding: 22px;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.25);
 }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 .modal-header h3 {
-  color: #1e382b;
+  font-family: "Noto Serif TC", serif;
+  color: var(--forest-deep);
 }
 
 .btn-close {
@@ -323,12 +451,16 @@ body {
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
-  color: #5d6f60;
+  color: var(--muted);
+}
+
+.btn-close:hover {
+  color: var(--forest-deep);
 }
 
 .canvas-container {
-  border: 2px solid #2a4733;
-  border-radius: 14px;
+  border: 2px solid var(--forest);
+  border-radius: var(--radius-md);
   background-color: #ffffff;
   touch-action: none;
 }
@@ -343,25 +475,52 @@ body {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-  margin-top: 15px;
+  margin-top: 16px;
 }
 
 .btn-secondary {
-  background-color: #e2ebd8;
-  color: #2d4a36;
-  border: none;
+  background-color: var(--card);
+  color: var(--forest-deep);
+  border: 1px solid var(--card-line);
   padding: 10px 16px;
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   font-weight: bold;
   cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.btn-secondary:hover {
+  background-color: var(--card-line);
 }
 
 .btn-primary-sm {
-  background-color: #2d4a36;
+  background-color: var(--forest);
   color: #ffffff;
   border: none;
   padding: 10px 16px;
-  border-radius: 12px;
+  border-radius: var(--radius-sm);
   font-weight: bold;
   cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.btn-primary-sm:hover {
+  background-color: var(--forest-deep);
+}
+
+/* ===================================================
+   無障礙 / 動態減量
+=================================================== */
+button:focus-visible,
+.club-card:focus-visible,
+.status-btn:focus-visible,
+.signature-box:focus-visible {
+  outline: 3px solid var(--amber);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
 }
