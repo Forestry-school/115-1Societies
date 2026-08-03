@@ -8,61 +8,70 @@
 </head>
 <body>
 
-  <div class="container">
+  <!-- 背景水彩暈染效果 -->
+  <div class="wash wash-1"></div>
+  <div class="wash wash-2"></div>
+  <div class="wash wash-3"></div>
+  <div class="wash wash-4"></div>
+
+  <div class="main-container">
     
-    <!-- 標頭區塊 -->
-    <header class="header">
-      <div class="logo-area">
-        <!-- 若有本地校徽圖片檔請替換 src，預設為對應綠色盾牌圖案 -->
-        <img src="logo.png" alt="福瑞斯特中小學校徽" class="school-logo" onerror="this.onerror=null; this.src='https://cdn-icons-png.flaticon.com/512/2942/2942544.png';">
-        <h1 class="school-title">福瑞斯特中小學</h1>
-        <p class="school-sub">Forestry Elementary and Junior High School</p>
+    <!-- 標題區塊 -->
+    <header class="header-block">
+      <!-- 標頭圖案/Logo -->
+      <img src="logo.png" alt="福瑞斯特中小學" class="app-logo" onerror="this.style.display='none'; document.getElementById('text-logo').style.display='block';">
+      <div id="text-logo" style="display:none; font-size:1.5rem; font-weight:bold; color:var(--green-deep); margin-bottom:8px;">
+        🌲 福瑞斯特中小學
       </div>
-      <div class="badge">FORESTRY SCHOOL CLUB</div>
-      <h2 class="system-title">115-1 社團線上點名系統</h2>
+      <div class="badge-stamp">FORESTRY SCHOOL CLUB</div>
+      <h4>115-1 社團線上點名系統</h4>
     </header>
 
-    <!-- 步驟 1：選擇社團 -->
-    <section class="card-box">
-      <div class="step-title">
-        <span>1</span> 選擇社團
+    <!-- 步驟 1：選擇學段 / 社團 -->
+    <section class="card">
+      <div class="step-eyebrow">
+        <span class="num">1</span> 選擇學段 / 時間
       </div>
       
-      <div class="form-group">
-        <label for="categorySelect">選擇學段 / 時間</label>
-        <select id="categorySelect" class="form-select" onchange="onCategoryChange()">
-          <option value="">-- 載入中... --</option>
-        </select>
-      </div>
+      <label class="form-label" for="categorySelect">選擇學段 / 時間</label>
+      <select id="categorySelect" class="form-select" onchange="fetchClubCards()">
+        <option value="">-- 載入中... --</option>
+      </select>
 
-      <div class="form-group" id="clubSelectGroup" style="display: none;">
-        <label for="clubSelect">選擇社團</label>
-        <select id="clubSelect" class="form-select" onchange="onClubChange()">
+      <div id="clubSelectContainer" style="display: none;">
+        <label class="form-label" for="clubSelect">選擇社團</label>
+        <select id="clubSelect" class="form-select" onchange="fetchStudents()">
           <option value="">-- 請選擇社團 --</option>
         </select>
       </div>
-
-      <!-- 社團卡片容器 (若使用卡片選擇時顯示) -->
-      <div id="clubCardContainer" class="club-grid" style="display: none;"></div>
     </section>
 
-    <!-- 步驟 2：學生點名 -->
-    <section class="card-box" id="rollcallSection" style="display: none;">
-      <div class="step-title">
-        <span>2</span> 學生點名
-      </div>
-      <div id="studentListContainer"></div>
-    </section>
-
-    <!-- 步驟 3：指導老師簽名確認 -->
-    <section class="card-box" id="signatureSection" style="display: none;">
-      <div class="step-title">
-        <span>3</span> 指導老師簽名確認
+    <!-- 步驟 2：學生點名表 -->
+    <section class="card" id="studentSection" style="display: none;">
+      <div class="step-eyebrow">
+        <span class="num">2</span> 學生點名表
       </div>
       
-      <div class="signature-box" onclick="openSignatureModal()">
-        <p class="signature-prompt">✍️ 點此開啟「全螢幕」手寫簽名</p>
-        <img id="signaturePreview" class="signature-preview" style="display: none;" alt="簽名預覽">
+      <div id="editNotice" class="edit-notice" style="display: none;">
+        ⚠️ 注意：今天已有點名紀錄，再次儲存將會覆蓋舊紀錄。
+      </div>
+
+      <div id="studentList">
+        <!-- JS 動態生成學生點名列表 -->
+      </div>
+    </section>
+
+    <!-- 步驟 3：指導老師簽名與送出 -->
+    <section class="card" id="signatureSection" style="display: none;">
+      <div class="step-eyebrow">
+        <span class="num">3</span> 指導老師簽名確認
+      </div>
+
+      <div class="signature-preview-box">
+        <button type="button" class="btn-outline" onclick="openSignatureModal()">
+          ✏️ 點此開啟「全螢幕」手寫簽名
+        </button>
+        <img id="signaturePreview" src="" alt="簽名預覽" style="display: none; margin-top: 10px;">
       </div>
 
       <button type="button" class="btn-primary" onclick="submitRollcall()">確認送出點名</button>
@@ -74,19 +83,19 @@
 
   </div>
 
-  <!-- 全螢幕簽名彈窗 Modal -->
-  <div id="signatureModal" class="modal">
-    <div class="modal-content">
+  <!-- 全螢幕簽名檔 Modal -->
+  <div id="signatureModal" class="modal-overlay">
+    <div class="modal-card">
       <div class="modal-header">
-        <h3>手寫簽名</h3>
-        <button type="button" class="btn-close" onclick="closeSignatureModal()">&times;</button>
+        <h3>指導老師簽名</h3>
+        <button type="button" class="btn-secondary" onclick="closeSignatureModal()">關閉</button>
       </div>
-      <div class="canvas-container">
-        <canvas id="signatureCanvas"></canvas>
+      <div id="modal-canvas-container">
+        <canvas id="modal-signature-pad"></canvas>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn-secondary" onclick="clearSignature()">清除重簽</button>
-        <button type="button" class="btn-primary-sm" onclick="saveSignature()">完成簽名</button>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" onclick="clearCanvas()">清除重簽</button>
+        <button type="button" class="btn-primary" onclick="saveSignature()">完成簽名</button>
       </div>
     </div>
   </div>
