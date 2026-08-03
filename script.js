@@ -1,72 +1,292 @@
-// 請確保替換成你最新的 Apps Script /exec 部署網址
+// Apps Script 網址
 const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyGrdJ8j-neGtzjsc4BXOVybWgBqtjjVsfKdxs2rh7spU6udfSXlj6grbstCaNK9XGR/exec";
+
+let currentSignatureData = "";
+let canvas, ctx, isDrawing = false;
 
 document.addEventListener("DOMContentLoaded", function() {
   loadCategories();
+  initCanvas();
 });
 
-// 1. 載入第一層：學段 / 時間選單
+// 1. 載入第一層：學段選單
 function loadCategories() {
   const categorySelect = document.getElementById("categorySelect");
-  if (!categorySelect) return;
   
-  categorySelect.innerHTML = '<option value="">-- 載入中... --</option>';
-
   fetch(`${GAS_WEB_APP_URL}?action=getCategories`, { redirect: "follow" })
     .then(res => res.json())
     .then(data => {
-      if (data.status === "error") throw new Error(data.message);
-      
-      categorySelect.innerHTML = '<option value="">請選擇學段 / 時間</option>';
-      data.forEach(cat => {
-        categorySelect.innerHTML += `<option value="${cat}">${cat}</option>`;
-      });
+      if (Array.isArray(data)) {
+        categorySelect.innerHTML = '<option value="">請選擇學段 / 時間</option>';
+        data.forEach(cat => {
+          categorySelect.innerHTML += `<option value="${cat}">${cat}</option>`;
+        });
+      } else {
+        categorySelect.innerHTML = '<option value="">載入失敗，請重新整理</option>';
+      }
     })
     .catch(err => {
-      console.error("載入學段失敗:", err);
-      categorySelect.innerHTML = '<option value="">-- 載入失敗，點此重試 --</option>';
-      categorySelect.onclick = () => { categorySelect.onclick = null; loadCategories(); };
+      console.error(err);
+      categorySelect.innerHTML = '<option value="">載入失敗，請確認網路</option>';
     });
 }
 
-// 2. 選擇學段後，載入該學段的社團下拉選單 (或卡片)
-function onCategoryChange() {
+// 2. 選擇學段後載入社團清單
+function fetchClubCards() {
   const category = document.getElementById("categorySelect").value;
-  const clubSelect = document.getElementById("clubSelect"); // 若是下拉選單
-  const clubCardContainer = document.getElementById("clubCardContainer"); // 若是卡片容器
+  const clubSelectContainer = document.getElementById("clubSelectContainer");
+  const clubSelect = document.getElementById("clubSelect");
+  
+  // 隱藏後續區塊
+  document.getElementById("studentSection").style.display = "none";
+  document.getElementById("signatureSection").style.display = "none";
 
-  if (!category) return;
+  if (!category) {
+    clubSelectContainer.style.display = "none";
+    return;
+  }
 
-  const url = `${GAS_WEB_APP_URL}?action=getClubs&category=${encodeURIComponent(category)}`;
+  clubSelectContainer.style.display = "block";
+  clubSelect.innerHTML = '<option value="">載入社團中...</option>';
 
-  fetch(url, { redirect: "follow" })
+  fetch(`${GAS_WEB_APP_URL}?action=getClubs&category=${encodeURIComponent(category)}`, { redirect: "follow" })
     .then(res => res.json())
     .then(clubs => {
-      if (clubs.status === "error") throw new Error(clubs.message);
-
-      // 如果你的介面是用「下拉選單」選擇社團
-      if (clubSelect) {
+      if (Array.isArray(clubs) && clubs.length > 0) {
         clubSelect.innerHTML = '<option value="">請選擇社團</option>';
         clubs.forEach(c => {
           clubSelect.innerHTML += `<option value="${c.id}">${c.name} (${c.id})</option>`;
         });
-      }
-
-      // 如果你的介面是用「卡片」選擇社團
-      if (clubCardContainer) {
-        let html = "";
-        clubs.forEach(c => {
-          html += `
-            <div class="club-card" onclick="selectClub('${c.id}', '${c.name}')">
-              <div class="club-title">${c.name}</div>
-              <div class="club-tag">${c.id}</div>
-            </div>`;
-        });
-        clubCardContainer.innerHTML = html;
+      } else {
+        clubSelect.innerHTML = '<option value="">此學段暫無社團</option>';
       }
     })
     .catch(err => {
-      console.error("載入社團失敗:", err);
-      alert("社團載入失敗，請確認網路或權限設定。");
+      console.error(err);
+      clubSelect.innerHTML = '<option value="">社團載入失敗</option>';
+    });
+}
+
+// 3. 選擇社團後載入學生名單
+function fetchStudents() {
+  const clubSelect = document.getElementById("clubSelect");
+  const clubId = clubSelect.value;
+  const studentSection = document.getElementById("studentSection");
+  const signatureSection = document.getElementById("signatureSection");
+  const studentList = document.getElementById("studentList");
+  const editNotice = document.getElementById("editNotice");
+
+  if (!clubId) {
+    studentSection.style.display = "none";
+    signatureSection.style.display = "none";
+    return;
+  }
+
+  studentList.innerHTML = '<p style="text-align:center; padding:20px;">載入學生名單中...</p>';
+  studentSection.style.display = "block";
+
+  fetch(`${GAS_WEB_APP_URL}?action=getStudents&clubId=${encodeURIComponent(clubId)}`, { redirect: "follow" })
+    .then(res => res.json())
+    .then(data => {
+      const students = data.students || [];
+      const existingRecords = data.existingRecords || {};
+      const existingSignature = data.existingSignature || "";
+
+      if (students.length === 0) {
+        studentList.innerHTML = '<p style="text-align:center; padding:20px;">此社團無學生名單。</p>';
+        signatureSection.style.display = "none";
+        return;
+      }
+
+      // 是否有今日舊紀錄
+      if (Object.keys(existingRecords).length > 0) {
+        editNotice.style.display = "flex";
+      } else {
+        editNotice.style.display = "none";
+      }
+
+      // 渲染學生點名列表（完全套用你原版的 HTML 標籤架構）
+      let html = "";
+      students.forEach(s => {
+        const status = existingRecords[s.seat] || "出席";
+        html += `
+          <div>
+            <div class="roll-id">
+              <span class="seat">${s.seat}</span>
+              <span class="name">${s.name}</span>
+            </div>
+            <div class="status-btn-group">
+              <input type="radio" id="st_${s.seat}_1" name="status_${s.seat}" value="出席" ${status === '出席' ? 'checked' : ''}>
+              <label for="st_${s.seat}_1">出席</label>
+
+              <input type="radio" id="st_${s.seat}_2" name="status_${s.seat}" value="請假" ${status === '請假' ? 'checked' : ''}>
+              <label for="st_${s.seat}_2">請假</label>
+
+              <input type="radio" id="st_${s.seat}_3" name="status_${s.seat}" value="缺席" ${status === '缺席' ? 'checked' : ''}>
+              <label for="st_${s.seat}_3">缺席</label>
+            </div>
+          </div>
+        `;
+      });
+      studentList.innerHTML = html;
+
+      // 載入簽名
+      if (existingSignature) {
+        currentSignatureData = existingSignature;
+        const img = document.getElementById("signaturePreview");
+        img.src = existingSignature;
+        img.style.display = "block";
+      }
+
+      signatureSection.style.display = "block";
+    })
+    .catch(err => {
+      console.error(err);
+      studentList.innerHTML = '<p style="text-align:center; color:red;">學生名單載入失敗</p>';
+    });
+}
+
+// 4. 全螢幕簽名畫布控制
+function initCanvas() {
+  canvas = document.getElementById("modal-signature-pad");
+  if (!canvas) return;
+  ctx = canvas.getContext("2d");
+
+  function resizeCanvas() {
+    const container = document.getElementById("modal-canvas-container");
+    if (container && container.clientWidth) {
+      canvas.width = container.clientWidth;
+      canvas.height = container.clientHeight || 250;
+      ctx.lineWidth = 3;
+      ctx.lineCap = "round";
+      ctx.strokeStyle = "#2E5138";
+    }
+  }
+
+  window.addEventListener("resize", resizeCanvas);
+
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return { x: clientX - rect.left, y: clientY - rect.top };
+  }
+
+  function startDraw(e) {
+    isDrawing = true;
+    const pos = getPos(e);
+    ctx.beginPath();
+    ctx.moveTo(pos.x, pos.y);
+  }
+
+  function draw(e) {
+    if (!isDrawing) return;
+    e.preventDefault();
+    const pos = getPos(e);
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
+  }
+
+  function stopDraw() { isDrawing = false; }
+
+  canvas.addEventListener("mousedown", startDraw);
+  canvas.addEventListener("mousemove", draw);
+  canvas.addEventListener("mouseup", stopDraw);
+
+  canvas.addEventListener("touchstart", startDraw, { passive: false });
+  canvas.addEventListener("touchmove", draw, { passive: false });
+  canvas.addEventListener("touchend", stopDraw);
+}
+
+function openSignatureModal() {
+  document.getElementById("signatureModal").classList.add("active");
+  document.body.classList.add("modal-open");
+  setTimeout(() => {
+    const container = document.getElementById("modal-canvas-container");
+    canvas.width = container.clientWidth;
+    canvas.height = container.clientHeight || 250;
+    ctx.lineWidth = 3;
+    ctx.lineCap = "round";
+    ctx.strokeStyle = "#2E5138";
+  }, 100);
+}
+
+function closeSignatureModal() {
+  document.getElementById("signatureModal").classList.remove("active");
+  document.body.classList.remove("modal-open");
+}
+
+function clearCanvas() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+function saveSignature() {
+  currentSignatureData = canvas.toDataURL("image/png");
+  const img = document.getElementById("signaturePreview");
+  img.src = currentSignatureData;
+  img.style.display = "block";
+  closeSignatureModal();
+}
+
+// 5. 儲存點名結果
+function submitRollcall() {
+  const clubSelect = document.getElementById("clubSelect");
+  const clubId = clubSelect.value;
+  const clubName = clubSelect.options[clubSelect.selectedIndex].text;
+
+  if (!clubId) {
+    alert("請先選擇社團！");
+    return;
+  }
+
+  if (!currentSignatureData) {
+    alert("請完成指導老師簽名！");
+    return;
+  }
+
+  const studentRows = document.querySelectorAll("#studentList > div");
+  const records = [];
+
+  studentRows.forEach(row => {
+    const seat = row.querySelector(".seat").innerText.trim();
+    const name = row.querySelector(".name").innerText.trim();
+    const checkedRadio = row.querySelector('input[type="radio"]:checked');
+    const status = checkedRadio ? checkedRadio.value : "出席";
+
+    records.push({ seat, name, status });
+  });
+
+  const payload = {
+    action: "saveRollcall",
+    clubId: clubId,
+    clubName: clubName,
+    signature: currentSignatureData,
+    records: records
+  };
+
+  const btn = event.target;
+  btn.innerText = "儲存中...";
+  btn.disabled = true;
+
+  fetch(GAS_WEB_APP_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain" },
+    body: JSON.stringify(payload)
+  })
+    .then(res => res.json())
+    .then(res => {
+      btn.innerText = "確認送出點名";
+      btn.disabled = false;
+      if (res.status === "success") {
+        alert("🎉 點名成功儲存！");
+      } else {
+        alert("儲存失敗: " + res.message);
+      }
+    })
+    .catch(err => {
+      btn.innerText = "確認送出點名";
+      btn.disabled = false;
+      console.error(err);
+      alert("儲存出錯，請檢查網路連線。");
     });
 }
