@@ -3,15 +3,50 @@ const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwVO9UVWa8MtWvs
 let modalSignaturePad;
 let signatureDataURL = "";
 
+// ⚡ 核心優化：JSONP 跨網域請求工具（解決 GitHub Pages 阻擋與卡死）
+function fetchJSONP(url) {
+  return new Promise((resolve, reject) => {
+    const callbackName = 'jsonp_cb_' + Math.round(100000 * Math.random());
+    const script = document.createElement('script');
+
+    // 設定 10 秒超時保護
+    const timeoutId = setTimeout(() => {
+      cleanUp();
+      reject(new Error("請求超時，請檢查網路狀態"));
+    }, 10000);
+
+    function cleanUp() {
+      delete window[callbackName];
+      if (script.parentNode) script.parentNode.removeChild(script);
+      clearTimeout(timeoutId);
+    }
+
+    window[callbackName] = function(data) {
+      cleanUp();
+      resolve(data);
+    };
+
+    script.src = `${url}${url.includes('?') ? '&' : '?'}callback=${callbackName}`;
+    script.onerror = function() {
+      cleanUp();
+      reject(new Error("網路連線失敗"));
+    };
+
+    document.body.appendChild(script);
+  });
+}
+
 window.onload = function() {
   const canvas = document.getElementById('modal-signature-pad');
-  modalSignaturePad = new SignaturePad(canvas, {
-    backgroundColor: 'rgb(255, 255, 255)',
-    penColor: 'rgb(46, 81, 56)'
-  });
+  if (canvas) {
+    modalSignaturePad = new SignaturePad(canvas, {
+      backgroundColor: 'rgb(255, 255, 255)',
+      penColor: 'rgb(46, 81, 56)'
+    });
 
-  canvas.addEventListener("touchstart", preventScroll, { passive: false });
-  canvas.addEventListener("touchmove", preventScroll, { passive: false });
+    canvas.addEventListener("touchstart", preventScroll, { passive: false });
+    canvas.addEventListener("touchmove", preventScroll, { passive: false });
+  }
 
   window.addEventListener("resize", resizeModalCanvas);
   loadCategories();
@@ -21,11 +56,10 @@ function preventScroll(e) {
   e.preventDefault();
 }
 
-// 載入社團類別
+// 1. 載入社團類別 (改用 JSONP)
 function loadCategories() {
   const categorySelect = document.getElementById("categorySelect");
-  fetch(`${GAS_WEB_APP_URL}?action=getCategories`)
-    .then(res => res.json())
+  fetchJSONP(`${GAS_WEB_APP_URL}?action=getCategories`)
     .then(categories => {
       categorySelect.innerHTML = '<option value="">-- 請選擇學段 / 時間 --</option>';
       categories.forEach(cat => {
@@ -33,6 +67,7 @@ function loadCategories() {
       });
     })
     .catch(err => {
+      console.error(err);
       categorySelect.innerHTML = '<option value="">-- 載入失敗，請重試 --</option>';
     });
 }
@@ -97,7 +132,7 @@ function saveModalSignature() {
   closeModal();
 }
 
-// 根據類別篩選社團
+// 2. 根據類別篩選社團 (改用 JSONP)
 function filterClubs() {
   const category = document.getElementById("categorySelect").value;
   const clubSelect = document.getElementById("clubSelect");
@@ -111,8 +146,7 @@ function filterClubs() {
   clubSelect.innerHTML = '<option value="">-- 載入社團名單中... --</option>';
   clubSelect.disabled = true;
 
-  fetch(`${GAS_WEB_APP_URL}?action=getClubs&category=${encodeURIComponent(category)}`)
-    .then(res => res.json())
+  fetchJSONP(`${GAS_WEB_APP_URL}?action=getClubs&category=${encodeURIComponent(category)}`)
     .then(clubs => {
       clubSelect.innerHTML = '<option value="">-- 請選擇社團 --</option>';
       clubs.forEach(c => {
@@ -120,13 +154,17 @@ function filterClubs() {
       });
       clubSelect.disabled = false;
     })
-    .catch(err => alert("無法讀取社團清單，請確認網路連線。"));
+    .catch(err => {
+      console.error(err);
+      alert("無法讀取社團清單，請確認網路連線。");
+      clubSelect.innerHTML = '<option value="">-- 載入失敗，請重試 --</option>';
+    });
 
   document.getElementById("rollcallSection").style.display = "none";
   document.getElementById("signatureSection").style.display = "none";
 }
 
-// 載入學生清單與今日紀錄
+// 3. 載入學生清單與今日紀錄 (改用 JSONP)
 function loadStudents() {
   const clubId = document.getElementById("clubSelect").value;
   if (!clubId) return;
@@ -138,8 +176,7 @@ function loadStudents() {
   studentListDiv.innerHTML = '<div style="text-align:center; padding: 12px 0; color: var(--ink-soft);">正在載入學生名單與紀錄...</div>';
   document.getElementById("rollcallSection").style.display = "block";
 
-  fetch(`${GAS_WEB_APP_URL}?action=getStudents&clubId=${encodeURIComponent(clubId)}`)
-    .then(res => res.json())
+  fetchJSONP(`${GAS_WEB_APP_URL}?action=getStudents&clubId=${encodeURIComponent(clubId)}`)
     .then(data => {
       studentListDiv.innerHTML = "";
       const students = data.students || [];
@@ -193,11 +230,12 @@ function loadStudents() {
       document.getElementById("signatureSection").style.display = "block";
     })
     .catch(err => {
+      console.error(err);
       studentListDiv.innerHTML = '<div style="color: var(--clay); text-align:center;">載入學生名單失敗，請確認網路連線。</div>';
     });
 }
 
-// 送出點名紀錄
+// 4. 送出點名紀錄 (POST 方法保持 no-cors 模式)
 function submitRollcall() {
   if (!signatureDataURL) {
     alert("請指導老師完成親筆簽名後再送出！");
@@ -219,7 +257,8 @@ function submitRollcall() {
     if (rollIdNode) {
       const seatSpan = rollIdNode.querySelector(".seat");
       const name = rollIdNode.textContent.replace(seatSpan ? seatSpan.textContent : "", "").trim();
-      const status = row.querySelector(`input[name="st_${idx}"]:checked`).value;
+      const statusRadio = row.querySelector(`input[name="st_${idx}"]:checked`);
+      const status = statusRadio ? statusRadio.value : "出席";
       records.push({ seat: seat, name: name, status: status });
     }
   });
@@ -234,10 +273,11 @@ function submitRollcall() {
 
   fetch(GAS_WEB_APP_URL, {
     method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   })
-  .then(res => res.json())
-  .then(data => {
+  .then(() => {
     alert("紀錄更新完成！");
     location.reload();
   })
