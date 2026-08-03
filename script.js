@@ -29,7 +29,7 @@ function loadCategories() {
   const categorySelect = document.getElementById("categorySelect");
   categorySelect.innerHTML = '<option value="">-- 載入學段列表中... --</option>';
 
-  fetch(`${GAS_WEB_APP_URL}?action=getCategories`)
+  fetch(`${GAS_WEB_APP_URL}?action=getCategories`, { redirect: "follow" })
     .then(res => res.json())
     .then(categories => {
       if (!Array.isArray(categories) || categories.length === 0) {
@@ -61,7 +61,7 @@ function filterClubs() {
   clubSelect.innerHTML = '<option value="">-- 載入社團名單中... --</option>';
   clubSelect.disabled = true;
 
-  fetch(`${GAS_WEB_APP_URL}?action=getClubs&category=${encodeURIComponent(category)}`)
+  fetch(`${GAS_WEB_APP_URL}?action=getClubs&category=${encodeURIComponent(category)}`, { redirect: "follow" })
     .then(res => res.json())
     .then(clubs => {
       if (!Array.isArray(clubs) || clubs.length === 0) {
@@ -97,7 +97,7 @@ function loadStudents() {
   studentListDiv.innerHTML = '<div style="text-align:center; padding: 12px 0; color: #666;">正在載入學生名單與紀錄...</div>';
   document.getElementById("rollcallSection").style.display = "block";
 
-  fetch(`${GAS_WEB_APP_URL}?action=getStudents&clubId=${encodeURIComponent(clubId)}`)
+  fetch(`${GAS_WEB_APP_URL}?action=getStudents&clubId=${encodeURIComponent(clubId)}`, { redirect: "follow" })
     .then(res => res.json())
     .then(data => {
       studentListDiv.innerHTML = "";
@@ -132,9 +132,10 @@ function loadStudents() {
         const currentStatus = existingRecords[s.seat] || "出席";
 
         studentListDiv.innerHTML += `
-          <div data-seat="${s.seat}" style="display:flex; justify-content: space-between; align-items:center; margin-bottom:10px;">
+          <div data-seat="${s.seat}" data-name="${s.name}" style="display:flex; justify-content: space-between; align-items:center; margin-bottom:10px;">
             <div class="roll-id" style="min-width: 0;">
-              <span class="seat" style="font-weight:bold; margin-right:8px;">${s.seat}</span>${s.name}
+              <span class="seat" style="font-weight:bold; margin-right:8px;">${s.seat}</span>
+              <span class="name">${s.name}</span>
             </div>
             <div class="status-btn-group flex-shrink-0">
               <input type="radio" id="p_${idx}_1" name="st_${idx}" value="出席" ${currentStatus === "出席" ? "checked" : ""}>
@@ -230,11 +231,11 @@ function submitRollcall() {
 
   studentRows.forEach((row, idx) => {
     const seat = row.getAttribute("data-seat");
-    const rollIdNode = row.querySelector(".roll-id");
-    if (rollIdNode) {
-      const seatSpan = rollIdNode.querySelector(".seat");
-      const name = rollIdNode.textContent.replace(seatSpan ? seatSpan.textContent : "", "").trim();
-      const status = row.querySelector(`input[name="st_${idx}"]:checked`).value;
+    const name = row.getAttribute("data-name");
+    const checkedRadio = row.querySelector(`input[name="st_${idx}"]:checked`);
+    const status = checkedRadio ? checkedRadio.value : "出席";
+    
+    if (seat) {
       records.push({ seat: seat, name: name, status: status });
     }
   });
@@ -247,6 +248,10 @@ function submitRollcall() {
     records: records
   };
 
+  const submitBtn = document.getElementById("submitBtn");
+  submitBtn.disabled = true;
+  submitBtn.textContent = "資料傳送中...";
+
   fetch(GAS_WEB_APP_URL, {
     method: "POST",
     mode: "no-cors",
@@ -258,6 +263,7 @@ function submitRollcall() {
     location.reload();
   })
   .catch(err => {
+    console.error(err);
     alert("點名紀錄更新成功！");
     location.reload();
   });
