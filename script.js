@@ -1,40 +1,8 @@
-// ⚡ 核心修復：更新為最新部署的 Web App URL
+// ⚡ 部署網址
 const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyGrdJ8j-neGtzjsc4BXOVybWgBqtjjVsfKdxs2rh7spU6udfSXlj6grbstCaNK9XGR/exec";
 
 let modalSignaturePad;
 let signatureDataURL = "";
-
-// ⚡ JSONP 工具（繞過 CORS 阻擋）
-function fetchJSONP(url) {
-  return new Promise((resolve, reject) => {
-    const callbackName = 'jsonp_cb_' + Math.round(100000 * Math.random());
-    const script = document.createElement('script');
-
-    const timeoutId = setTimeout(() => {
-      cleanUp();
-      reject(new Error("請求超時，請檢查網路或 GAS 部署"));
-    }, 12000);
-
-    function cleanUp() {
-      delete window[callbackName];
-      if (script.parentNode) script.parentNode.removeChild(script);
-      clearTimeout(timeoutId);
-    }
-
-    window[callbackName] = function(data) {
-      cleanUp();
-      resolve(data);
-    };
-
-    script.src = `${url}${url.includes('?') ? '&' : '?'}callback=${callbackName}`;
-    script.onerror = function() {
-      cleanUp();
-      reject(new Error("網路連線失敗或 API 網址無效"));
-    };
-
-    document.body.appendChild(script);
-  });
-}
 
 window.onload = function() {
   const canvas = document.getElementById('modal-signature-pad');
@@ -61,7 +29,8 @@ function loadCategories() {
   const categorySelect = document.getElementById("categorySelect");
   categorySelect.innerHTML = '<option value="">-- 載入學段列表中... --</option>';
 
-  fetchJSONP(`${GAS_WEB_APP_URL}?action=getCategories`)
+  fetch(`${GAS_WEB_APP_URL}?action=getCategories`)
+    .then(res => res.json())
     .then(categories => {
       if (!Array.isArray(categories) || categories.length === 0) {
         categorySelect.innerHTML = '<option value="">-- 查無適用對象資料 --</option>';
@@ -73,7 +42,7 @@ function loadCategories() {
       });
     })
     .catch(err => {
-      console.error(err);
+      console.error("Fetch Error:", err);
       categorySelect.innerHTML = '<option value="">-- 載入失敗，請重試 --</option>';
     });
 }
@@ -92,20 +61,22 @@ function filterClubs() {
   clubSelect.innerHTML = '<option value="">-- 載入社團名單中... --</option>';
   clubSelect.disabled = true;
 
-  fetchJSONP(`${GAS_WEB_APP_URL}?action=getClubs&category=${encodeURIComponent(category)}`)
+  fetch(`${GAS_WEB_APP_URL}?action=getClubs&category=${encodeURIComponent(category)}`)
+    .then(res => res.json())
     .then(clubs => {
       if (!Array.isArray(clubs) || clubs.length === 0) {
         clubSelect.innerHTML = '<option value="">-- 此分類無社團 --</option>';
         clubSelect.disabled = true;
         return;
       }
-      clubSelect.innerHTML = '<option value="">-- 請選擇社团 --</option>';
+      clubSelect.innerHTML = '<option value="">-- 請選擇社團 --</option>';
       clubs.forEach(c => {
         clubSelect.innerHTML += `<option value="${c.id}">${c.name} (${c.id})</option>`;
       });
       clubSelect.disabled = false;
     })
     .catch(err => {
+      console.error(err);
       alert("無法讀取社團清單，請確認網路連線。");
       clubSelect.innerHTML = '<option value="">-- 載入失敗，請重試 --</option>';
     });
@@ -126,7 +97,8 @@ function loadStudents() {
   studentListDiv.innerHTML = '<div style="text-align:center; padding: 12px 0; color: #666;">正在載入學生名單與紀錄...</div>';
   document.getElementById("rollcallSection").style.display = "block";
 
-  fetchJSONP(`${GAS_WEB_APP_URL}?action=getStudents&clubId=${encodeURIComponent(clubId)}`)
+  fetch(`${GAS_WEB_APP_URL}?action=getStudents&clubId=${encodeURIComponent(clubId)}`)
+    .then(res => res.json())
     .then(data => {
       studentListDiv.innerHTML = "";
       const students = data.students || [];
@@ -160,7 +132,7 @@ function loadStudents() {
         const currentStatus = existingRecords[s.seat] || "出席";
 
         studentListDiv.innerHTML += `
-          <div data-seat="${s.seat}" style="display:flex; justify-between; align-items:center; margin-bottom:10px;">
+          <div data-seat="${s.seat}" style="display:flex; justify-content: space-between; align-items:center; margin-bottom:10px;">
             <div class="roll-id" style="min-width: 0;">
               <span class="seat" style="font-weight:bold; margin-right:8px;">${s.seat}</span>${s.name}
             </div>
@@ -179,11 +151,12 @@ function loadStudents() {
       document.getElementById("signatureSection").style.display = "block";
     })
     .catch(err => {
+      console.error(err);
       studentListDiv.innerHTML = '<div style="color: red; text-align:center;">載入學生名單失敗，請確認網路連線。</div>';
     });
 }
 
-// 4. Modal 手寫簽名相關邏輯
+// 4. Modal 手寫簽名邏輯
 function openSignatureModal() {
   document.body.classList.add('modal-open');
   document.getElementById('signatureModal').classList.add('active');
