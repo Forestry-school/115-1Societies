@@ -1,180 +1,114 @@
-// ==========================================
-// 1. 設定與全域變數
-// ==========================================
-// ⚠️ 請確認下方 URL 為您 Apps Script 最新部署的 Web App URL
+// 指向 Google Apps Script Web App URL
 const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyGrdJ8j-neGtzjsc4BXOVybWgBqtjjVsfKdxs2rh7spU6udfSXlj6grbstCaNK9XGR/exec";
 
-let currentStudents = []; // 儲存當前社團的學生名單
-let signaturePad = null;  // 簽名板實例
+let currentStudents = [];
+let selectedClubInfo = { id: "", name: "" };
+let signaturePad = null;
 
-// ==========================================
-// 2. 初始化頁面
-// ==========================================
 document.addEventListener("DOMContentLoaded", () => {
   initSignaturePad();
   loadCategories();
 
-  // 監聽第一層選單：學段 / 時間
-  document.getElementById("categorySelect").addEventListener("change", filterClubs);
+  // 1. 監聽第一層選單
+  document.getElementById("categorySelect").addEventListener("change", fetchClubCards);
 
-  // 監聽第二層選單：社團
-  document.getElementById("clubSelect").addEventListener("change", loadStudents);
-
-  // 監聽表單送出（儲存點名）
+  // 2. 監聽表單提交
   document.getElementById("rollcallForm").addEventListener("submit", handleFormSubmit);
 
-  // 監聽清除簽名按鈕
+  // 3. 監聽清除簽名
   document.getElementById("clearSigBtn").addEventListener("click", () => {
     if (signaturePad) signaturePad.clear();
   });
 });
 
-// ==========================================
-// 3. 簽名板初始化
-// ==========================================
-function initSignaturePad() {
-  const canvas = document.getElementById("signatureCanvas");
-  if (!canvas) return;
-
-  // 動態調整 Canvas 寬度
-  function resizeCanvas() {
-    const ratio = Math.max(window.devicePixelRatio || 1, 1);
-    canvas.width = canvas.offsetWidth * ratio;
-    canvas.height = canvas.offsetHeight * ratio;
-    canvas.getContext("2d").scale(ratio, ratio);
-    if (signaturePad) signaturePad.clear();
-  }
-
-  window.addEventListener("resize", resizeCanvas);
-  
-  // 使用 SignaturePad 函式庫 (網頁 HTML 需引入 signature_pad.umd.js)
-  if (typeof SignaturePad !== "undefined") {
-    signaturePad = new SignaturePad(canvas, {
-      backgroundColor: 'rgb(255, 255, 255)',
-      penColor: 'rgb(0, 0, 0)'
-    });
-    resizeCanvas();
-  }
-}
-
-// ==========================================
-// 4. 載入第一層選單 (學段 / 時間)
-// ==========================================
+// 1. 載入學段選單
 function loadCategories() {
   const categorySelect = document.getElementById("categorySelect");
   categorySelect.innerHTML = '<option value="">-- 載入中... --</option>';
 
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 15000);
-
-  fetch(`${GAS_WEB_APP_URL}?action=getCategories`, { 
-    redirect: "follow",
-    signal: controller.signal 
-  })
+  fetch(`${GAS_WEB_APP_URL}?action=getCategories`, { redirect: "follow" })
     .then(res => res.json())
     .then(data => {
-      clearTimeout(timeoutId);
       if (!Array.isArray(data) || data.length === 0) {
-        categorySelect.innerHTML = '<option value="">-- 暫無學段資料 --</option>';
+        categorySelect.innerHTML = '<option value="">-- 暫無資料 --</option>';
         return;
       }
-
       categorySelect.innerHTML = '<option value="">-- 請選擇學段 / 時間 --</option>';
       data.forEach(cat => {
         categorySelect.innerHTML += `<option value="${cat}">${cat}</option>`;
       });
     })
     .catch(err => {
-      clearTimeout(timeoutId);
-      console.error("載入學段失敗:", err);
+      console.error(err);
       categorySelect.innerHTML = '<option value="">-- 載入失敗，請重新整理 --</option>';
     });
 }
 
-// ==========================================
-// 5. 根據選取的學段，載入第二層社團名單
-// ==========================================
-function filterClubs() {
+// 2. 選擇學段後生成社團「卡片」
+function fetchClubCards() {
   const category = document.getElementById("categorySelect").value;
-  const clubSelect = document.getElementById("clubSelect");
+  const clubSection = document.getElementById("clubSection");
+  const clubCardContainer = document.getElementById("clubCardContainer");
+
+  hideRollcallSections();
 
   if (!category) {
-    clubSelect.innerHTML = '<option value="">-- 請先選擇學段 --</option>';
-    clubSelect.disabled = true;
-    hideSections();
+    clubSection.style.display = "none";
     return;
   }
 
-  clubSelect.innerHTML = '<option value="">-- 載入社團名單中... --</option>';
-  clubSelect.disabled = true;
-  hideSections();
+  clubSection.style.display = "block";
+  clubCardContainer.innerHTML = '<p class="loading-text">載入社團卡片中...</p>';
 
-  // 設定 15 秒 Timeout 逾時防護
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 15000);
-
-  fetch(`${GAS_WEB_APP_URL}?action=getClubs&category=${encodeURIComponent(category)}`, { 
-    redirect: "follow",
-    signal: controller.signal 
-  })
+  fetch(`${GAS_WEB_APP_URL}?action=getClubs&category=${encodeURIComponent(category)}`, { redirect: "follow" })
     .then(res => res.json())
     .then(clubs => {
-      clearTimeout(timeoutId);
-
-      if (!Array.isArray(clubs)) {
-        alert("讀取社團資料格式錯誤，請重試");
-        clubSelect.innerHTML = '<option value="">-- 載入失敗 --</option>';
+      if (!Array.isArray(clubs) || clubs.length === 0) {
+        clubCardContainer.innerHTML = '<p class="warning-text">此分類目前無對應社團。</p>';
         return;
       }
 
-      if (clubs.length === 0) {
-        clubSelect.innerHTML = '<option value="">-- 此分類無對應社團 --</option>';
-        clubSelect.disabled = true;
-        return;
-      }
-
-      clubSelect.innerHTML = '<option value="">-- 請選擇社團 --</option>';
+      let cardsHtml = "";
       clubs.forEach(c => {
-        clubSelect.innerHTML += `<option value="${c.id}">${c.name} (${c.id})</option>`;
+        cardsHtml += `
+          <div class="club-card" onclick="selectClubCard(this, '${c.id}', '${c.name}')">
+            <div class="club-name">${c.name}</div>
+            <div class="club-id">${c.id}</div>
+          </div>
+        `;
       });
-      clubSelect.disabled = false;
+      clubCardContainer.innerHTML = cardsHtml;
     })
     .catch(err => {
-      clearTimeout(timeoutId);
-      console.error("載入社團失敗:", err);
-      alert("連線較慢或失敗，請重新切換一次學段選項！");
-      clubSelect.innerHTML = '<option value="">-- 載入失敗，請重試 --</option>';
+      console.error(err);
+      clubCardContainer.innerHTML = '<p class="error-text">社團卡片載入失敗，請重新選擇學段。</p>';
     });
 }
 
-// ==========================================
-// 6. 載入學生名單與舊點名紀錄
-// ==========================================
-function loadStudents() {
-  const clubId = document.getElementById("clubSelect").value;
+// 3. 點擊卡片動作
+function selectClubCard(cardElement, clubId, clubName) {
+  document.querySelectorAll(".club-card").forEach(c => c.classList.remove("active"));
+  cardElement.classList.add("active");
+
+  selectedClubInfo = { id: clubId, name: clubName };
+  loadStudents(clubId, clubName);
+}
+
+// 4. 載入學生名單
+function loadStudents(clubId, clubName) {
   const studentListContainer = document.getElementById("studentList");
+  const rollcallSection = document.getElementById("rollcallSection");
 
-  if (!clubId) {
-    hideSections();
-    return;
-  }
+  rollcallSection.style.display = "block";
+  studentListContainer.innerHTML = `<p class="loading-text">載入【${clubName}】學生名單中...</p>`;
 
-  studentListContainer.innerHTML = '<p class="loading-text">載入學生名單中...</p>';
-  document.getElementById("rollcallSection").style.display = "block";
+  rollcallSection.scrollIntoView({ behavior: 'smooth' });
 
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 15000);
-
-  fetch(`${GAS_WEB_APP_URL}?action=getStudents&clubId=${encodeURIComponent(clubId)}`, { 
-    redirect: "follow",
-    signal: controller.signal 
-  })
+  fetch(`${GAS_WEB_APP_URL}?action=getStudents&clubId=${encodeURIComponent(clubId)}`, { redirect: "follow" })
     .then(res => res.json())
     .then(data => {
-      clearTimeout(timeoutId);
-
       if (!data || !Array.isArray(data.students)) {
-        studentListContainer.innerHTML = '<p class="error-text">載入學生名單失敗，請確認資料結構。</p>';
+        studentListContainer.innerHTML = '<p class="error-text">學生名單載入失敗。</p>';
         return;
       }
 
@@ -186,22 +120,16 @@ function loadStudents() {
         return;
       }
 
-      // 渲染學生名單表格
       renderStudentList(data.students, data.existingRecords || {});
-
-      // 顯示簽名區塊
       document.getElementById("signatureSection").style.display = "block";
     })
     .catch(err => {
-      clearTimeout(timeoutId);
-      console.error("載入學生失敗:", err);
-      studentListContainer.innerHTML = '<p class="error-text">載入學生名單失敗，請確認網路連線並重試。</p>';
+      console.error(err);
+      studentListContainer.innerHTML = '<p class="error-text">載入學生名單連線失敗，請重試。</p>';
     });
 }
 
-// ==========================================
-// 7. 渲染學生點名列表
-// ==========================================
+// 5. 渲染學生列表表格
 function renderStudentList(students, existingRecords) {
   const container = document.getElementById("studentList");
   let html = `
@@ -217,9 +145,7 @@ function renderStudentList(students, existingRecords) {
   `;
 
   students.forEach((s, idx) => {
-    // 預設狀態：若今日已有舊紀錄就用舊紀錄，否則預設為「出席」
     const status = existingRecords[s.seat] || "出席";
-
     html += `
       <tr>
         <td>${s.seat}</td>
@@ -238,23 +164,17 @@ function renderStudentList(students, existingRecords) {
   container.innerHTML = html;
 }
 
-// ==========================================
-// 8. 表單提交 (寫入 Google 試算表)
-// ==========================================
+// 6. 提交點名紀錄
 function handleFormSubmit(e) {
   e.preventDefault();
 
-  const clubSelect = document.getElementById("clubSelect");
-  const clubId = clubSelect.value;
-  const clubName = clubSelect.options[clubSelect.selectedIndex].text;
-
-  if (!clubId) {
-    alert("請先選擇社團！");
+  if (!selectedClubInfo.id) {
+    alert("請先選擇社團卡片！");
     return;
   }
 
   if (signaturePad && signaturePad.isEmpty()) {
-    alert("請先完成指導老師簽名！");
+    alert("請指導老師完成簽名再提交！");
     return;
   }
 
@@ -262,7 +182,6 @@ function handleFormSubmit(e) {
   submitBtn.disabled = true;
   submitBtn.innerText = "儲存中，請稍候...";
 
-  // 收集學生點名狀態
   const records = currentStudents.map((s, idx) => {
     const selectedRadio = document.querySelector(`input[name="status_${idx}"]:checked`);
     return {
@@ -272,14 +191,11 @@ function handleFormSubmit(e) {
     };
   });
 
-  // 取得簽名 Base64 圖片
-  const signatureData = signaturePad ? signaturePad.toDataURL() : "";
-
   const payload = {
     action: "saveRollcall",
-    clubId: clubId,
-    clubName: clubName,
-    signature: signatureData,
+    clubId: selectedClubInfo.id,
+    clubName: selectedClubInfo.name,
+    signature: signaturePad ? signaturePad.toDataURL() : "",
     records: records
   };
 
@@ -301,15 +217,32 @@ function handleFormSubmit(e) {
       }
     })
     .catch(err => {
-      console.error("提交錯誤:", err);
+      console.error(err);
       submitBtn.disabled = false;
       submitBtn.innerText = "儲存點名紀錄";
-      alert("儲存失敗，請檢查網路連線後重試！");
+      alert("儲存失敗，請檢查網路連線。");
     });
 }
 
-// 輔助：隱藏下方的點名與簽名區
-function hideSections() {
+// 輔助函式
+function hideRollcallSections() {
   document.getElementById("rollcallSection").style.display = "none";
   document.getElementById("signatureSection").style.display = "none";
+}
+
+function initSignaturePad() {
+  const canvas = document.getElementById("signatureCanvas");
+  if (!canvas || typeof SignaturePad === "undefined") return;
+
+  function resizeCanvas() {
+    const ratio = Math.max(window.devicePixelRatio || 1, 1);
+    canvas.width = canvas.offsetWidth * ratio;
+    canvas.height = canvas.offsetHeight * ratio;
+    canvas.getContext("2d").scale(ratio, ratio);
+    if (signaturePad) signaturePad.clear();
+  }
+
+  window.addEventListener("resize", resizeCanvas);
+  signaturePad = new SignaturePad(canvas, { backgroundColor: 'rgb(255, 255, 255)' });
+  resizeCanvas();
 }
