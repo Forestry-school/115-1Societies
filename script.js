@@ -1,9 +1,10 @@
-const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwVO9UVWa8MtWvszbvrAYI4vxkJpZIQWIey-JWlx7Rh_M9GZDvhcP8W7njcG7O4MtUs/exec";
+// ⚡ 核心修復：更新為最新部署的 Web App URL
+const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyGrdJ8j-neGtzjsc4BXOVybWgBqtjjVsfKdxs2rh7spU6udfSXlj6grbstCaNK9XGR/exec";
 
 let modalSignaturePad;
 let signatureDataURL = "";
 
-// ⚡ 核心修復：JSONP 工具（繞過 CORS 阻擋）
+// ⚡ JSONP 工具（繞過 CORS 阻擋）
 function fetchJSONP(url) {
   return new Promise((resolve, reject) => {
     const callbackName = 'jsonp_cb_' + Math.round(100000 * Math.random());
@@ -11,8 +12,8 @@ function fetchJSONP(url) {
 
     const timeoutId = setTimeout(() => {
       cleanUp();
-      reject(new Error("請求超時"));
-    }, 10000);
+      reject(new Error("請求超時，請檢查網路或 GAS 部署"));
+    }, 12000);
 
     function cleanUp() {
       delete window[callbackName];
@@ -28,7 +29,7 @@ function fetchJSONP(url) {
     script.src = `${url}${url.includes('?') ? '&' : '?'}callback=${callbackName}`;
     script.onerror = function() {
       cleanUp();
-      reject(new Error("網路連線失敗"));
+      reject(new Error("網路連線失敗或 API 網址無效"));
     };
 
     document.body.appendChild(script);
@@ -55,11 +56,17 @@ function preventScroll(e) {
   e.preventDefault();
 }
 
-// 載入社團類別
+// 1. 載入適用對象 (學段 / 時間)
 function loadCategories() {
   const categorySelect = document.getElementById("categorySelect");
+  categorySelect.innerHTML = '<option value="">-- 載入學段列表中... --</option>';
+
   fetchJSONP(`${GAS_WEB_APP_URL}?action=getCategories`)
     .then(categories => {
+      if (!Array.isArray(categories) || categories.length === 0) {
+        categorySelect.innerHTML = '<option value="">-- 查無適用對象資料 --</option>';
+        return;
+      }
       categorySelect.innerHTML = '<option value="">-- 請選擇學段 / 時間 --</option>';
       categories.forEach(cat => {
         categorySelect.innerHTML += `<option value="${cat}">${cat}</option>`;
@@ -71,67 +78,7 @@ function loadCategories() {
     });
 }
 
-// 開啟簽名 Modal
-function openSignatureModal() {
-  document.body.classList.add('modal-open');
-  document.getElementById('signatureModal').classList.add('active');
-  setTimeout(() => {
-    resizeModalCanvas();
-  }, 100);
-}
-
-// 關閉 Modal
-function closeModal() {
-  document.body.classList.remove('modal-open');
-  document.getElementById('signatureModal').classList.remove('active');
-}
-
-// 自適應調整 Canvas 大小
-function resizeModalCanvas() {
-  const canvas = document.getElementById('modal-signature-pad');
-  const container = document.getElementById('modal-canvas-container');
-  if (!canvas || !container) return;
-
-  const ratio = Math.max(window.devicePixelRatio || 1, 1);
-  let data = null;
-  if (modalSignaturePad && !modalSignaturePad.isEmpty()) {
-    data = modalSignaturePad.toData();
-  }
-
-  canvas.width = container.offsetWidth * ratio;
-  canvas.height = container.offsetHeight * ratio;
-  canvas.getContext("2d").scale(ratio, ratio);
-
-  if (modalSignaturePad) {
-    modalSignaturePad.clear();
-    if (data) {
-      modalSignaturePad.fromData(data);
-    }
-  }
-}
-
-// 清除簽名
-function clearModalSignature() {
-  if (modalSignaturePad) {
-    modalSignaturePad.clear();
-  }
-}
-
-// 保存簽名
-function saveModalSignature() {
-  if (!modalSignaturePad || modalSignaturePad.isEmpty()) {
-    alert("請完成簽名後再點選「完成簽名」！");
-    return;
-  }
-
-  signatureDataURL = modalSignaturePad.toDataURL('image/png');
-  document.getElementById('openSignatureBtn').style.display = 'none';
-  document.getElementById('signaturePreview').style.display = 'block';
-  document.getElementById('previewImg').src = signatureDataURL;
-  closeModal();
-}
-
-// 根據類別篩選社團
+// 2. 根據類別篩選社團
 function filterClubs() {
   const category = document.getElementById("categorySelect").value;
   const clubSelect = document.getElementById("clubSelect");
@@ -147,14 +94,19 @@ function filterClubs() {
 
   fetchJSONP(`${GAS_WEB_APP_URL}?action=getClubs&category=${encodeURIComponent(category)}`)
     .then(clubs => {
-      clubSelect.innerHTML = '<option value="">-- 請選擇社團 --</option>';
+      if (!Array.isArray(clubs) || clubs.length === 0) {
+        clubSelect.innerHTML = '<option value="">-- 此分類無社團 --</option>';
+        clubSelect.disabled = true;
+        return;
+      }
+      clubSelect.innerHTML = '<option value="">-- 請選擇社团 --</option>';
       clubs.forEach(c => {
         clubSelect.innerHTML += `<option value="${c.id}">${c.name} (${c.id})</option>`;
       });
       clubSelect.disabled = false;
     })
     .catch(err => {
-      alert("無法讀取社团清單，請確認網路連線。");
+      alert("無法讀取社團清單，請確認網路連線。");
       clubSelect.innerHTML = '<option value="">-- 載入失敗，請重試 --</option>';
     });
 
@@ -162,7 +114,7 @@ function filterClubs() {
   document.getElementById("signatureSection").style.display = "none";
 }
 
-// 載入學生清單與今日紀錄
+// 3. 載入學生清單與今日紀錄
 function loadStudents() {
   const clubId = document.getElementById("clubSelect").value;
   if (!clubId) return;
@@ -171,7 +123,7 @@ function loadStudents() {
   const editNotice = document.getElementById("editNotice");
   const submitBtn = document.getElementById("submitBtn");
 
-  studentListDiv.innerHTML = '<div style="text-align:center; padding: 12px 0; color: var(--ink-soft);">正在載入學生名單與紀錄...</div>';
+  studentListDiv.innerHTML = '<div style="text-align:center; padding: 12px 0; color: #666;">正在載入學生名單與紀錄...</div>';
   document.getElementById("rollcallSection").style.display = "block";
 
   fetchJSONP(`${GAS_WEB_APP_URL}?action=getStudents&clubId=${encodeURIComponent(clubId)}`)
@@ -182,7 +134,7 @@ function loadStudents() {
       const existingSignature = data.existingSignature || "";
 
       if (students.length === 0) {
-        studentListDiv.innerHTML = '<div style="background: var(--sand-tint); color: #8A6200; border-radius: 16px; padding: 14px; text-align: center;">此社團目前沒有學生資料。</div>';
+        studentListDiv.innerHTML = '<div style="background: #fdf8e6; color: #8A6200; border-radius: 12px; padding: 14px; text-align: center;">此社團目前沒有學生資料。</div>';
         return;
       }
 
@@ -208,9 +160,9 @@ function loadStudents() {
         const currentStatus = existingRecords[s.seat] || "出席";
 
         studentListDiv.innerHTML += `
-          <div data-seat="${s.seat}">
+          <div data-seat="${s.seat}" style="display:flex; justify-between; align-items:center; margin-bottom:10px;">
             <div class="roll-id" style="min-width: 0;">
-              <span class="seat">${s.seat}</span>${s.name}
+              <span class="seat" style="font-weight:bold; margin-right:8px;">${s.seat}</span>${s.name}
             </div>
             <div class="status-btn-group flex-shrink-0">
               <input type="radio" id="p_${idx}_1" name="st_${idx}" value="出席" ${currentStatus === "出席" ? "checked" : ""}>
@@ -227,11 +179,67 @@ function loadStudents() {
       document.getElementById("signatureSection").style.display = "block";
     })
     .catch(err => {
-      studentListDiv.innerHTML = '<div style="color: var(--clay); text-align:center;">載入學生名單失敗，請確認網路連線。</div>';
+      studentListDiv.innerHTML = '<div style="color: red; text-align:center;">載入學生名單失敗，請確認網路連線。</div>';
     });
 }
 
-// 送出點名紀錄
+// 4. Modal 手寫簽名相關邏輯
+function openSignatureModal() {
+  document.body.classList.add('modal-open');
+  document.getElementById('signatureModal').classList.add('active');
+  setTimeout(() => {
+    resizeModalCanvas();
+  }, 100);
+}
+
+function closeModal() {
+  document.body.classList.remove('modal-open');
+  document.getElementById('signatureModal').classList.remove('active');
+}
+
+function resizeModalCanvas() {
+  const canvas = document.getElementById('modal-signature-pad');
+  const container = document.getElementById('modal-canvas-container');
+  if (!canvas || !container) return;
+
+  const ratio = Math.max(window.devicePixelRatio || 1, 1);
+  let data = null;
+  if (modalSignaturePad && !modalSignaturePad.isEmpty()) {
+    data = modalSignaturePad.toData();
+  }
+
+  canvas.width = container.offsetWidth * ratio;
+  canvas.height = container.offsetHeight * ratio;
+  canvas.getContext("2d").scale(ratio, ratio);
+
+  if (modalSignaturePad) {
+    modalSignaturePad.clear();
+    if (data) {
+      modalSignaturePad.fromData(data);
+    }
+  }
+}
+
+function clearModalSignature() {
+  if (modalSignaturePad) {
+    modalSignaturePad.clear();
+  }
+}
+
+function saveModalSignature() {
+  if (!modalSignaturePad || modalSignaturePad.isEmpty()) {
+    alert("請完成簽名後再點選「完成簽名」！");
+    return;
+  }
+
+  signatureDataURL = modalSignaturePad.toDataURL('image/png');
+  document.getElementById('openSignatureBtn').style.display = 'none';
+  document.getElementById('signaturePreview').style.display = 'block';
+  document.getElementById('previewImg').src = signatureDataURL;
+  closeModal();
+}
+
+// 5. 送出點名紀錄
 function submitRollcall() {
   if (!signatureDataURL) {
     alert("請指導老師完成親筆簽名後再送出！");
@@ -273,11 +281,11 @@ function submitRollcall() {
     body: JSON.stringify(payload)
   })
   .then(() => {
-    alert("紀錄更新完成！");
+    alert("點名紀錄更新成功！");
     location.reload();
   })
   .catch(err => {
-    alert("紀錄更新完成！");
+    alert("點名紀錄更新成功！");
     location.reload();
   });
 }
