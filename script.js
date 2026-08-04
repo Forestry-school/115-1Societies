@@ -67,21 +67,31 @@ function fetchClubCards() {
   clubSelectContainer.style.display = "block";
   clubSelect.innerHTML = '<option value="">載入中...</option>';
 
-  fetch(`${GAS_WEB_APP_URL}?action=getClubs&category=${encodeURIComponent(category)}`, { redirect: "follow" })
-    .then(res => res.json())
+  const requestUrl = `${GAS_WEB_APP_URL}?action=getClubs&category=${encodeURIComponent(category)}`;
+
+  fetch(requestUrl, { redirect: "follow" })
+    .then(res => {
+      if (!res.ok) throw new Error(`HTTP Status ${res.status}`);
+      return res.json();
+    })
     .then(clubs => {
+      if (clubs && clubs.error) {
+        throw new Error(clubs.error);
+      }
+
       if (Array.isArray(clubs) && clubs.length > 0) {
-        clubSelect.innerHTML = '<option value="">請選擇社團</option>';
+        let html = '<option value="">請選擇社團</option>';
         clubs.forEach(c => {
-          clubSelect.innerHTML += `<option value="${c.name}">${c.name}</option>`;
+          html += `<option value="${c.name}">${c.name}</option>`;
         });
+        clubSelect.innerHTML = html;
       } else {
         clubSelect.innerHTML = '<option value="">此學段暫無社團</option>';
       }
     })
     .catch(err => {
-      console.error("載入社團失敗:", err);
-      clubSelect.innerHTML = '<option value="">社團載入失敗</option>';
+      console.error("載入社團失敗詳情:", err);
+      clubSelect.innerHTML = '<option value="">社團載入失敗，請重新選擇</option>';
     });
 }
 
@@ -275,7 +285,7 @@ function saveSignature() {
 function submitRollcall(btnBtn) {
   const clubSelect = document.getElementById("clubSelect");
   const clubId = clubSelect.value;
-  const clubName = clubSelect.value; // 社團名稱即為 Value
+  const clubName = clubSelect.value;
 
   if (!clubId) {
     alert("請先選擇社團！");
