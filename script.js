@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", function() {
   initCanvas();
 });
 
-// 1. 載入第一層選單 (學段 / 時間) - 帶有自動重試機制，防止 GAS 冷啟動逾時
+// 1. 載入第一層選單 (帶有自動重試機制)
 function loadCategories(retryCount = 0) {
   const categorySelect = document.getElementById("categorySelect");
   
@@ -35,8 +35,6 @@ function loadCategories(retryCount = 0) {
     })
     .catch(err => {
       console.error(`第 ${retryCount + 1} 次連線嘗試失敗:`, err);
-      
-      // 失敗時自動重試最多 2 次，間隔 1.5 秒
       if (retryCount < 2) {
         setTimeout(() => {
           loadCategories(retryCount + 1);
@@ -56,7 +54,6 @@ function fetchClubCards() {
   document.getElementById("studentSection").style.display = "none";
   document.getElementById("signatureSection").style.display = "none";
 
-  // 重置簽名紀錄
   currentSignatureData = "";
   if (document.getElementById("signaturePreviewBox")) {
     document.getElementById("signaturePreviewBox").style.display = "none";
@@ -88,15 +85,14 @@ function fetchClubCards() {
     });
 }
 
-// 3. 載入學生名單與當日歷史簽名 (單一行手機優化版)
-function fetchStudents() {
+// 3. 載入學生名單與當日歷史簽名 (防冷啟動與自動重試)
+function fetchStudents(retryCount = 0) {
   const clubId = document.getElementById("clubSelect").value;
   const studentSection = document.getElementById("studentSection");
   const signatureSection = document.getElementById("signatureSection");
   const studentList = document.getElementById("studentList");
   const editNotice = document.getElementById("editNotice");
 
-  // 切換社團時先清空簽名狀態
   currentSignatureData = "";
   const previewBox = document.getElementById("signaturePreviewBox");
   if (previewBox) previewBox.style.display = "none";
@@ -107,12 +103,23 @@ function fetchStudents() {
     return;
   }
 
-  studentList.innerHTML = '<p style="text-align:center; color:var(--ink-soft); padding:10px;">載入學生名單中...</p>';
   studentSection.style.display = "block";
+  if (retryCount > 0) {
+    studentList.innerHTML = `<p style="text-align:center; color:var(--ink-soft); padding:10px;">系統讀取中 (${retryCount}/3)...</p>`;
+  } else {
+    studentList.innerHTML = '<p style="text-align:center; color:var(--ink-soft); padding:10px;">載入學生名單中...</p>';
+  }
 
   fetch(`${GAS_WEB_APP_URL}?action=getStudents&clubId=${encodeURIComponent(clubId)}`, { redirect: "follow" })
-    .then(res => res.json())
+    .then(res => {
+      if (!res.ok) throw new Error("HTTP Status " + res.status);
+      return res.json();
+    })
     .then(data => {
+      if (data.error) {
+        throw new Error("後端錯誤: " + data.error);
+      }
+
       const students = data.students || [];
       const existingRecords = data.existingRecords || {};
       const existingSignature = data.existingSignature || "";
@@ -133,13 +140,11 @@ function fetchStudents() {
         html += `
           <div class="student-item" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed #e0e0e0; flex-wrap: nowrap; gap: 4px;">
             
-            <!-- 左側：班級座號 + 學生姓名 (單行緊湊) -->
             <div class="roll-id" style="display: flex; align-items: center; gap: 6px; min-width: 0; flex-shrink: 1;">
               <span class="seat" style="background-color: #f0ede6; color: #2e5138; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 13px; white-space: nowrap;">${s.seat}</span>
               <span class="name" style="font-size: 15px; font-weight: bold; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${s.name}</span>
             </div>
 
-            <!-- 右側：出席 / 請假 / 缺席 按鈕 (單行橫向) -->
             <div class="status-btn-group" style="display: flex; gap: 3px; flex-shrink: 0;">
               <input type="radio" id="st_${idx}_1" name="status_${idx}" value="出席" ${status === '出席' ? 'checked' : ''}>
               <label for="st_${idx}_1" style="padding: 4px 8px; font-size: 13px;">出席</label>
@@ -156,7 +161,6 @@ function fetchStudents() {
       });
       studentList.innerHTML = html;
 
-      // 載入「當日」已儲存的歷史簽名
       if (existingSignature && existingSignature.length > 50) {
         currentSignatureData = existingSignature;
         const previewImg = document.getElementById("signaturePreview");
@@ -170,8 +174,14 @@ function fetchStudents() {
       signatureSection.style.display = "block";
     })
     .catch(err => {
-      console.error(err);
-      studentList.innerHTML = '<p style="text-align:center; color:var(--clay); padding:10px;">載入學生資料失敗</p>';
+      console.error(`第 ${retryCount + 1} 次載入學生失敗:`, err);
+      if (retryCount < 2) {
+        setTimeout(() => {
+          fetchStudents(retryCount + 1);
+        }, 1200);
+      } else {
+        studentList.innerHTML = '<p style="text-align:center; color:var(--clay); padding:10px;">載入學生資料失敗，請重新切換社團或重新整理網頁。</p>';
+      }
     });
 }
 
@@ -226,7 +236,6 @@ function openSignatureModal() {
     ctx.lineCap = "round";
     ctx.strokeStyle = "#2E5138";
 
-    // 開啟手寫板時先清空畫布
     clearCanvas();
   }, 100);
 }
@@ -243,7 +252,6 @@ function clearCanvas() {
 }
 
 function saveSignature() {
-  // 防呆檢查：判斷畫布是否全然空白
   const blank = document.createElement('canvas');
   blank.width = canvas.width;
   blank.height = canvas.height;
@@ -274,7 +282,6 @@ function submitRollcall(btnBtn) {
     return;
   }
 
-  // 嚴格驗證簽名長度 (防止誤傳空白)
   if (!currentSignatureData || currentSignatureData.length < 50) {
     alert("請點擊步驟 3 的按鈕完成指導老師手寫簽名！");
     return;
