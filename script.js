@@ -38,6 +38,12 @@ function fetchClubCards() {
   document.getElementById("studentSection").style.display = "none";
   document.getElementById("signatureSection").style.display = "none";
 
+  // 重置簽名紀錄
+  currentSignatureData = "";
+  if (document.getElementById("signaturePreviewBox")) {
+    document.getElementById("signaturePreviewBox").style.display = "none";
+  }
+
   if (!category) {
     clubSelectContainer.style.display = "none";
     return;
@@ -64,13 +70,18 @@ function fetchClubCards() {
     });
 }
 
-// 3. 載入學生名單 (完美對應截圖中的單列樣式)
+// 3. 載入學生名單與當日歷史簽名
 function fetchStudents() {
   const clubId = document.getElementById("clubSelect").value;
   const studentSection = document.getElementById("studentSection");
   const signatureSection = document.getElementById("signatureSection");
   const studentList = document.getElementById("studentList");
   const editNotice = document.getElementById("editNotice");
+
+  // 切換社團時先清空簽名狀態
+  currentSignatureData = "";
+  const previewBox = document.getElementById("signaturePreviewBox");
+  if (previewBox) previewBox.style.display = "none";
 
   if (!clubId) {
     studentSection.style.display = "none";
@@ -94,7 +105,9 @@ function fetchStudents() {
         return;
       }
 
-      editNotice.style.display = Object.keys(existingRecords).length > 0 ? "flex" : "none";
+      if (editNotice) {
+        editNotice.style.display = Object.keys(existingRecords).length > 0 ? "flex" : "none";
+      }
 
       let html = "";
       students.forEach((s, idx) => {
@@ -120,13 +133,15 @@ function fetchStudents() {
       });
       studentList.innerHTML = html;
 
-      if (existingSignature) {
+      // 載入「當日」已儲存的歷史簽名
+      if (existingSignature && existingSignature.length > 50) {
         currentSignatureData = existingSignature;
-        document.getElementById("signaturePreview").src = existingSignature;
-        document.getElementById("signaturePreviewBox").style.display = "block";
+        const previewImg = document.getElementById("signaturePreview");
+        if (previewImg) previewImg.src = existingSignature;
+        if (previewBox) previewBox.style.display = "block";
       } else {
         currentSignatureData = "";
-        document.getElementById("signaturePreviewBox").style.display = "none";
+        if (previewBox) previewBox.style.display = "none";
       }
 
       signatureSection.style.display = "block";
@@ -187,6 +202,9 @@ function openSignatureModal() {
     ctx.lineWidth = 3;
     ctx.lineCap = "round";
     ctx.strokeStyle = "#2E5138";
+
+    // 開啟手寫板時先清空畫布，供當天重新繪寫簽名
+    clearCanvas();
   }, 100);
 }
 
@@ -196,13 +214,29 @@ function closeSignatureModal() {
 }
 
 function clearCanvas() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (ctx && canvas) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
 }
 
 function saveSignature() {
+  // 防呆檢查：判斷畫布是否全然空白
+  const blank = document.createElement('canvas');
+  blank.width = canvas.width;
+  blank.height = canvas.height;
+
+  if (canvas.toDataURL() === blank.toDataURL()) {
+    alert("簽名檔為空白，請在手寫板上完成簽名後再點選確定！");
+    return;
+  }
+
   currentSignatureData = canvas.toDataURL("image/png");
-  document.getElementById("signaturePreview").src = currentSignatureData;
-  document.getElementById("signaturePreviewBox").style.display = "block";
+  const previewImg = document.getElementById("signaturePreview");
+  const previewBox = document.getElementById("signaturePreviewBox");
+
+  if (previewImg) previewImg.src = currentSignatureData;
+  if (previewBox) previewBox.style.display = "block";
+  
   closeSignatureModal();
 }
 
@@ -217,8 +251,9 @@ function submitRollcall(btnBtn) {
     return;
   }
 
-  if (!currentSignatureData) {
-    alert("請點擊步驟 3 的按鈕完成手寫簽名！");
+  // 嚴格驗證簽名長度 (防止誤傳空白)
+  if (!currentSignatureData || currentSignatureData.length < 50) {
+    alert("請點擊步驟 3 的按鈕完成指導老師手寫簽名！");
     return;
   }
 
@@ -226,12 +261,14 @@ function submitRollcall(btnBtn) {
   const records = [];
 
   rows.forEach(row => {
-    const seat = row.querySelector(".seat").innerText.trim();
-    const name = row.querySelector(".name").innerText.trim();
+    const seat = row.querySelector(".seat") ? row.querySelector(".seat").innerText.trim() : "";
+    const name = row.querySelector(".name") ? row.querySelector(".name").innerText.trim() : "";
     const checkedRadio = row.querySelector('input[type="radio"]:checked');
     const status = checkedRadio ? checkedRadio.value : "出席";
 
-    records.push({ seat, name, status });
+    if (seat) {
+      records.push({ seat, name, status });
+    }
   });
 
   const payload = {
