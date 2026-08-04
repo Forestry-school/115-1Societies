@@ -51,8 +51,8 @@ function fetchClubCards() {
   const clubSelectContainer = document.getElementById("clubSelectContainer");
   const clubSelect = document.getElementById("clubSelect");
   
-  document.getElementById("studentSection").style.display = "none";
-  document.getElementById("signatureSection").style.display = "none";
+  if (document.getElementById("studentSection")) document.getElementById("studentSection").style.display = "none";
+  if (document.getElementById("signatureSection")) document.getElementById("signatureSection").style.display = "none";
 
   currentSignatureData = "";
   if (document.getElementById("signaturePreviewBox")) {
@@ -73,14 +73,14 @@ function fetchClubCards() {
       if (Array.isArray(clubs) && clubs.length > 0) {
         clubSelect.innerHTML = '<option value="">請選擇社團</option>';
         clubs.forEach(c => {
-          clubSelect.innerHTML += `<option value="${c.id}">${c.name} (${c.id})</option>`;
+          clubSelect.innerHTML += `<option value="${c.name}">${c.name}</option>`;
         });
       } else {
         clubSelect.innerHTML = '<option value="">此學段暫無社團</option>';
       }
     })
     .catch(err => {
-      console.error(err);
+      console.error("載入社團失敗:", err);
       clubSelect.innerHTML = '<option value="">社團載入失敗</option>';
     });
 }
@@ -275,7 +275,7 @@ function saveSignature() {
 function submitRollcall(btnBtn) {
   const clubSelect = document.getElementById("clubSelect");
   const clubId = clubSelect.value;
-  const clubName = clubSelect.options[clubSelect.selectedIndex].text;
+  const clubName = clubSelect.value; // 社團名稱即為 Value
 
   if (!clubId) {
     alert("請先選擇社團！");
