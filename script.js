@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", function() {
   initCanvas();
 });
 
-// 1. 載入第一層選單
+// 1. 載入第一層選單 (學段 / 時間)
 function loadCategories() {
   const categorySelect = document.getElementById("categorySelect");
   fetch(`${GAS_WEB_APP_URL}?action=getCategories`, { redirect: "follow" })
@@ -70,7 +70,7 @@ function fetchClubCards() {
     });
 }
 
-// 3. 載入學生名單與當日歷史簽名
+// 3. 載入學生名單與當日歷史簽名 (單一行手機優化版)
 function fetchStudents() {
   const clubId = document.getElementById("clubSelect").value;
   const studentSection = document.getElementById("studentSection");
@@ -113,21 +113,26 @@ function fetchStudents() {
       students.forEach((s, idx) => {
         const status = existingRecords[s.seat] || "出席";
         html += `
-          <div>
-            <div class="roll-id">
-              <span class="seat">${s.seat}</span>
-              <span class="name">${s.name}</span>
+          <div class="student-item" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed #e0e0e0; flex-wrap: nowrap; gap: 4px;">
+            
+            <!-- 左側：班級座號 + 學生姓名 (單行緊湊) -->
+            <div class="roll-id" style="display: flex; align-items: center; gap: 6px; min-width: 0; flex-shrink: 1;">
+              <span class="seat" style="background-color: #f0ede6; color: #2e5138; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 13px; white-space: nowrap;">${s.seat}</span>
+              <span class="name" style="font-size: 15px; font-weight: bold; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${s.name}</span>
             </div>
-            <div class="status-btn-group">
+
+            <!-- 右側：出席 / 請假 / 缺席 按鈕 (單行橫向) -->
+            <div class="status-btn-group" style="display: flex; gap: 3px; flex-shrink: 0;">
               <input type="radio" id="st_${idx}_1" name="status_${idx}" value="出席" ${status === '出席' ? 'checked' : ''}>
-              <label for="st_${idx}_1">出席</label>
+              <label for="st_${idx}_1" style="padding: 4px 8px; font-size: 13px;">出席</label>
 
               <input type="radio" id="st_${idx}_2" name="status_${idx}" value="請假" ${status === '請假' ? 'checked' : ''}>
-              <label for="st_${idx}_2">請假</label>
+              <label for="st_${idx}_2" style="padding: 4px 8px; font-size: 13px;">請假</label>
 
               <input type="radio" id="st_${idx}_3" name="status_${idx}" value="缺席" ${status === '缺席' ? 'checked' : ''}>
-              <label for="st_${idx}_3">缺席</label>
+              <label for="st_${idx}_3" style="padding: 4px 8px; font-size: 13px;">缺席</label>
             </div>
+
           </div>
         `;
       });
@@ -203,7 +208,7 @@ function openSignatureModal() {
     ctx.lineCap = "round";
     ctx.strokeStyle = "#2E5138";
 
-    // 開啟手寫板時先清空畫布，供當天重新繪寫簽名
+    // 開啟手寫板時先清空畫布
     clearCanvas();
   }, 100);
 }
@@ -257,7 +262,7 @@ function submitRollcall(btnBtn) {
     return;
   }
 
-  const rows = document.querySelectorAll("#studentList > div");
+  const rows = document.querySelectorAll("#studentList > .student-item");
   const records = [];
 
   rows.forEach(row => {
