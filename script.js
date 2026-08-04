@@ -85,7 +85,7 @@ function fetchClubCards() {
     });
 }
 
-// 3. 載入學生名單與當日歷史簽名 (防冷啟動與自動重試)
+// 3. 載入學生名單與當日歷史簽名
 function fetchStudents(retryCount = 0) {
   const clubId = document.getElementById("clubSelect").value;
   const studentSection = document.getElementById("studentSection");
@@ -185,7 +185,7 @@ function fetchStudents(retryCount = 0) {
     });
 }
 
-// 4. 全螢幕手寫板邏輯
+// 4. 手寫板控制
 function initCanvas() {
   canvas = document.getElementById("modal-signature-pad");
   if (!canvas) return;
