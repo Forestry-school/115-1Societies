@@ -8,11 +8,21 @@ document.addEventListener("DOMContentLoaded", function() {
   initCanvas();
 });
 
-// 1. 載入第一層選單 (學段 / 時間)
-function loadCategories() {
+// 1. 載入第一層選單 (學段 / 時間) - 帶有自動重試機制，防止 GAS 冷啟動逾時
+function loadCategories(retryCount = 0) {
   const categorySelect = document.getElementById("categorySelect");
+  
+  if (retryCount > 0) {
+    categorySelect.innerHTML = `<option value="">系統連線中 (${retryCount}/3)...</option>`;
+  } else {
+    categorySelect.innerHTML = '<option value="">-- 載入中... --</option>';
+  }
+
   fetch(`${GAS_WEB_APP_URL}?action=getCategories`, { redirect: "follow" })
-    .then(res => res.json())
+    .then(res => {
+      if (!res.ok) throw new Error("HTTP error " + res.status);
+      return res.json();
+    })
     .then(data => {
       if (Array.isArray(data)) {
         categorySelect.innerHTML = '<option value="">請選擇學段 / 時間</option>';
@@ -24,8 +34,16 @@ function loadCategories() {
       }
     })
     .catch(err => {
-      console.error(err);
-      categorySelect.innerHTML = '<option value="">連線失敗，請檢查網路</option>';
+      console.error(`第 ${retryCount + 1} 次連線嘗試失敗:`, err);
+      
+      // 失敗時自動重試最多 2 次，間隔 1.5 秒
+      if (retryCount < 2) {
+        setTimeout(() => {
+          loadCategories(retryCount + 1);
+        }, 1500);
+      } else {
+        categorySelect.innerHTML = '<option value="">連線逾時，請重新整理網頁</option>';
+      }
     });
 }
 
