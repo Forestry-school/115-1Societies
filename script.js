@@ -88,7 +88,7 @@ function fetchClubCards(retryCount = 0) {
     });
 }
 
-// 3. 載入學生名單 - 套用蠟筆手繪感底圖 (已移除重複社團名稱)
+// 3. 載入學生名單 - 套用蠟筆手繪感底圖 (加入強制 5 秒超時與自動重連機制)
 function fetchStudents(retryCount = 0) {
   const category = document.getElementById("categorySelect").value;
   const clubId = document.getElementById("clubSelect").value;
@@ -109,12 +109,18 @@ function fetchStudents(retryCount = 0) {
 
   studentSection.style.display = "block";
   studentList.innerHTML = retryCount > 0 
-    ? `<p style="text-align:center; color:var(--ink-soft); padding:10px;">系統讀取中 (${retryCount}/3)...</p>`
+    ? `<p style="text-align:center; color:var(--clay); padding:10px;">Google 伺服器稍慢，強制重新連線中 (${retryCount}/3)...</p>`
     : '<p style="text-align:center; color:var(--ink-soft); padding:10px;">載入學生名單中...</p>';
 
   const targetUrl = `${GAS_WEB_APP_URL}?action=getStudents&clubId=${encodeURIComponent(clubId)}&category=${encodeURIComponent(category)}`;
 
-  fetch(targetUrl, { redirect: "follow" })
+  // 殺手鐧：設定 5 秒超時強制放棄，觸發重連
+  const timeoutPromise = new Promise((resolve, reject) => {
+    setTimeout(() => reject(new Error("連線逾時，Google 伺服器無回應")), 5000);
+  });
+  const fetchPromise = fetch(targetUrl, { redirect: "follow" });
+
+  Promise.race([fetchPromise, timeoutPromise])
     .then(res => res.text())
     .then(text => {
       const data = JSON.parse(text);
@@ -139,9 +145,7 @@ function fetchStudents(retryCount = 0) {
         html += `
           <div class="student-item" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; margin-bottom: 12px; background-color: var(--forest-soft); border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px; flex-wrap: wrap; gap: 4px;">
             <div class="roll-id" style="display: flex; align-items: baseline; gap: 8px; min-width: 0; flex-shrink: 1;">
-              <!-- 顯示座號 -->
               <span class="seat" style="color: var(--ink); font-weight: 900; font-size: 1rem;">${s.seat}</span>
-              <!-- 顯示姓名 -->
               <span class="name" style="font-size: 1rem; font-weight: bold; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${s.name}</span>
             </div>
             
@@ -170,8 +174,12 @@ function fetchStudents(retryCount = 0) {
       signatureSection.style.display = "block";
     })
     .catch(err => {
-      console.error(`載入學生失敗:`, err);
-      studentList.innerHTML = '<p style="text-align:center; color:var(--clay); padding:10px;">載入資料失敗，請切換社團或重新整理網頁。</p>';
+      console.error(`第 ${retryCount + 1} 次載入學生失敗:`, err);
+      if (retryCount < 2) {
+        setTimeout(() => fetchStudents(retryCount + 1), 1000);
+      } else {
+        studentList.innerHTML = '<p style="text-align:center; color:var(--clay); padding:10px;">載入資料失敗。請重新選擇社團，或重整網頁。</p>';
+      }
     });
 }
 
