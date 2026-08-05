@@ -3,7 +3,10 @@
 // ==========================================
 
 const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyGrdJ8j-neGtzjsc4BXOVybWgBqtjjVsfKdxs2rh7spU6udfSXlj6grbstCaNK9XGR/exec"; 
-let currentSignatureData = ""; // 儲存全域簽名圖片 Data URL
+let currentSignatureData = ""; 
+let signaturePadCanvas, signaturePadCtx;
+let isDrawing = false;
+let isSignatureInit = false; 
 
 // 當網頁載入完成後，自動執行載入第一層選單
 document.addEventListener("DOMContentLoaded", () => {
@@ -147,45 +150,42 @@ function fetchStudents(retryCount = 0) {
       signatureSection.style.display = "block";
     })
     .catch(err => {
-      console.error(`第 ${retryCount + 1} 次載入學生失敗:`, err);
-      if (retryCount < 2) {
-        setTimeout(() => fetchStudents(retryCount + 1), 1200);
-      } else {
-        studentList.innerHTML = '<p style="text-align:center; color:var(--clay); padding:10px;">載入學生資料失敗，請重新切換社團或重新整理網頁。</p>';
-      }
+      console.error(`載入學生失敗:`, err);
+      studentList.innerHTML = '<p style="text-align:center; color:var(--clay); padding:10px;">載入資料失敗，請切換社團或重新整理網頁。</p>';
     });
 }
 
 // ==========================================
 // 4. 全螢幕手寫簽名板邏輯
 // ==========================================
-let signaturePadCanvas, signaturePadCtx;
-let isDrawing = false;
-
 function initSignaturePad() {
   signaturePadCanvas = document.getElementById('modal-signature-pad');
-  signaturePadCtx = signaturePadCanvas.getContext('2d');
+  if (!signaturePadCanvas) return;
   
+  signaturePadCtx = signaturePadCanvas.getContext('2d');
   const container = document.getElementById('modal-canvas-container');
-  // 修正 Canvas 解析度，避免畫出來的線條位置偏移
-  signaturePadCanvas.width = container.clientWidth;
-  signaturePadCanvas.height = container.clientHeight;
+  
+  // 修正 Canvas 解析度
+  signaturePadCanvas.width = container.clientWidth || 300;
+  signaturePadCanvas.height = container.clientHeight || 200;
   
   signaturePadCtx.lineWidth = 4;
   signaturePadCtx.lineCap = 'round';
   signaturePadCtx.lineJoin = 'round';
-  signaturePadCtx.strokeStyle = '#163C2C'; // 配合設計的深綠色墨水
+  signaturePadCtx.strokeStyle = '#163C2C'; 
   
-  // 電腦滑鼠事件
-  signaturePadCanvas.addEventListener('mousedown', startDrawing);
-  signaturePadCanvas.addEventListener('mousemove', draw);
-  signaturePadCanvas.addEventListener('mouseup', stopDrawing);
-  signaturePadCanvas.addEventListener('mouseout', stopDrawing);
-  
-  // 手機觸控事件
-  signaturePadCanvas.addEventListener('touchstart', handleTouchStart, {passive: false});
-  signaturePadCanvas.addEventListener('touchmove', handleTouchMove, {passive: false});
-  signaturePadCanvas.addEventListener('touchend', stopDrawing);
+  if (!isSignatureInit) {
+    signaturePadCanvas.addEventListener('mousedown', startDrawing);
+    signaturePadCanvas.addEventListener('mousemove', draw);
+    signaturePadCanvas.addEventListener('mouseup', stopDrawing);
+    signaturePadCanvas.addEventListener('mouseout', stopDrawing);
+    
+    signaturePadCanvas.addEventListener('touchstart', handleTouchStart, {passive: false});
+    signaturePadCanvas.addEventListener('touchmove', handleTouchMove, {passive: false});
+    signaturePadCanvas.addEventListener('touchend', stopDrawing);
+    
+    isSignatureInit = true;
+  }
 }
 
 function getPos(evt, isTouch = false) {
@@ -214,7 +214,7 @@ function stopDrawing() {
 }
 
 function handleTouchStart(e) {
-  e.preventDefault();
+  if (e.cancelable) e.preventDefault();
   isDrawing = true;
   const pos = getPos(e, true);
   signaturePadCtx.beginPath();
@@ -222,22 +222,36 @@ function handleTouchStart(e) {
 }
 
 function handleTouchMove(e) {
-  e.preventDefault();
+  if (e.cancelable) e.preventDefault();
   if (!isDrawing) return;
   const pos = getPos(e, true);
   signaturePadCtx.lineTo(pos.x, pos.y);
   signaturePadCtx.stroke();
 }
 
+// 點擊開啟簽名板 (已加入雙重強制顯示保護)
 function openSignatureModal() {
-  document.getElementById('signatureModal').classList.add('active');
-  document.body.classList.add('modal-open');
-  // 延遲初始化以確保取得正確的視窗大小
-  setTimeout(initSignaturePad, 100); 
+  try {
+    const modal = document.getElementById('signatureModal');
+    if (modal) {
+      modal.style.display = 'flex'; // 第一重保護：強制顯示
+      modal.classList.add('active'); // 第二重保護：掛上 class
+      document.body.classList.add('modal-open');
+      setTimeout(initSignaturePad, 150); 
+    } else {
+      alert("錯誤：找不到 signatureModal 元素！");
+    }
+  } catch (err) {
+    alert("開啟失敗: " + err.message);
+  }
 }
 
 function closeSignatureModal() {
-  document.getElementById('signatureModal').classList.remove('active');
+  const modal = document.getElementById('signatureModal');
+  if (modal) {
+    modal.style.display = 'none';
+    modal.classList.remove('active');
+  }
   document.body.classList.remove('modal-open');
 }
 
@@ -248,14 +262,17 @@ function clearCanvas() {
 }
 
 function saveSignature() {
+  if (!signaturePadCanvas) return;
   const dataUrl = signaturePadCanvas.toDataURL('image/png');
   currentSignatureData = dataUrl;
   
   const previewImg = document.getElementById("signaturePreview");
   const previewBox = document.getElementById("signaturePreviewBox");
   
-  previewImg.src = dataUrl;
-  previewBox.style.display = "block";
+  if (previewImg && previewBox) {
+    previewImg.src = dataUrl;
+    previewBox.style.display = "block";
+  }
   
   closeSignatureModal();
 }
@@ -299,7 +316,6 @@ function submitRollcall(btn) {
 
   fetch(GAS_WEB_APP_URL, {
     method: 'POST',
-    // 避免部分瀏覽器擋 CORS OPTIONS 請求，使用 text/plain
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
     body: JSON.stringify(payload)
   })
@@ -309,7 +325,6 @@ function submitRollcall(btn) {
       alert("✅ 點名紀錄已成功送出！");
       btn.innerText = "確認送出點名";
       btn.disabled = false;
-      // 成功後可以考慮重新載入名單或清空畫面
     } else {
       alert("❌ 送出失敗：" + (data.message || "未知錯誤"));
       btn.innerText = "確認送出點名";
