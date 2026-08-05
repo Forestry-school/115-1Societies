@@ -13,11 +13,15 @@ document.addEventListener("DOMContentLoaded", () => {
   fetchCategories();
 });
 
-// 1. 載入第一層選單 (學段 / 時間)
-function fetchCategories() {
+// 1. 載入第一層選單 (學段 / 時間) - 增加自動重試機制
+function fetchCategories(retryCount = 0) {
   const categorySelect = document.getElementById("categorySelect");
 
-  fetch(`${GAS_WEB_APP_URL}?action=getCategories`)
+  if (retryCount > 0) {
+    categorySelect.innerHTML = `<option value="">-- 重新連線中 (${retryCount}/3)... --</option>`;
+  }
+
+  fetch(`${GAS_WEB_APP_URL}?action=getCategories`, { redirect: "follow" })
     .then(res => res.json())
     .then(categories => {
       if (!categories || categories.length === 0) {
@@ -32,13 +36,17 @@ function fetchCategories() {
       categorySelect.innerHTML = html;
     })
     .catch(err => {
-      console.error("載入學段失敗:", err);
-      categorySelect.innerHTML = '<option value="">-- 載入失敗，請檢查連線 --</option>';
+      console.error(`第 ${retryCount + 1} 次載入學段失敗:`, err);
+      if (retryCount < 2) {
+        setTimeout(() => fetchCategories(retryCount + 1), 1500);
+      } else {
+        categorySelect.innerHTML = '<option value="">-- 載入失敗，請重新整理網頁 --</option>';
+      }
     });
 }
 
-// 2. 載入第二層選單 (對應的社團)
-function fetchClubCards() {
+// 2. 載入第二層選單 (對應的社團) - 增加自動重試機制
+function fetchClubCards(retryCount = 0) {
   const category = document.getElementById("categorySelect").value;
   const clubSelectContainer = document.getElementById("clubSelectContainer");
   const clubSelect = document.getElementById("clubSelect");
@@ -52,12 +60,16 @@ function fetchClubCards() {
     return;
   }
 
-  clubSelectContainer.style.display = "block";
-  clubSelect.innerHTML = '<option value="">-- 載入中... --</option>';
-  studentSection.style.display = "none";
-  signatureSection.style.display = "none";
+  if (retryCount === 0) {
+    clubSelectContainer.style.display = "block";
+    clubSelect.innerHTML = '<option value="">-- 載入中... --</option>';
+    studentSection.style.display = "none";
+    signatureSection.style.display = "none";
+  } else {
+    clubSelect.innerHTML = `<option value="">-- 重新連線中 (${retryCount}/3)... --</option>`;
+  }
 
-  fetch(`${GAS_WEB_APP_URL}?action=getClubs&category=${encodeURIComponent(category)}`)
+  fetch(`${GAS_WEB_APP_URL}?action=getClubs&category=${encodeURIComponent(category)}`, { redirect: "follow" })
     .then(res => res.json())
     .then(clubs => {
       let html = '<option value="">-- 請選擇社團 --</option>';
@@ -67,12 +79,16 @@ function fetchClubCards() {
       clubSelect.innerHTML = html;
     })
     .catch(err => {
-      console.error("載入社團失敗:", err);
-      clubSelect.innerHTML = '<option value="">-- 載入失敗 --</option>';
+      console.error(`第 ${retryCount + 1} 次載入社團失敗:`, err);
+      if (retryCount < 2) {
+        setTimeout(() => fetchClubCards(retryCount + 1), 1500);
+      } else {
+        clubSelect.innerHTML = '<option value="">-- 載入失敗，請重新選擇學段 --</option>';
+      }
     });
 }
 
-// 3. 載入學生名單
+// 3. 載入學生名單 - 套用蠟筆手繪感底圖
 function fetchStudents(retryCount = 0) {
   const category = document.getElementById("categorySelect").value;
   const clubId = document.getElementById("clubSelect").value;
@@ -119,12 +135,18 @@ function fetchStudents(retryCount = 0) {
       let html = "";
       students.forEach((s, idx) => {
         const status = existingRecords[s.seat] || "出席";
+        // 蠟筆手繪感 UI 區塊
         html += `
-          <div class="student-item" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed #e0e0e0; flex-wrap: nowrap; gap: 4px;">
-            <div class="roll-id" style="display: flex; align-items: center; gap: 6px; min-width: 0; flex-shrink: 1;">
-              <span class="seat" style="background-color: #f0ede6; color: #2e5138; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 13px; white-space: nowrap;">${s.seat}</span>
-              <span class="name" style="font-size: 15px; font-weight: bold; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${s.name}</span>
+          <div class="student-item" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; margin-bottom: 12px; background-color: var(--forest-soft); border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px; flex-wrap: wrap; gap: 4px;">
+            <div class="roll-id" style="display: flex; align-items: baseline; gap: 8px; min-width: 0; flex-shrink: 1;">
+              <!-- 顯示社團名稱 -->
+              <span style="color: var(--clay); font-family: 'Noto Serif TC', serif; font-weight: 900; font-size: 1.05rem; letter-spacing: 0.05em;">${clubId}</span>
+              <!-- 顯示座號 -->
+              <span class="seat" style="color: var(--ink); font-weight: 900; font-size: 1rem;">${s.seat}</span>
+              <!-- 顯示姓名 -->
+              <span class="name" style="font-size: 1rem; font-weight: bold; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${s.name}</span>
             </div>
+            
             <div class="status-btn-group" style="display: flex; gap: 3px; flex-shrink: 0;">
               <input type="radio" id="st_${idx}_1" name="status_${idx}" value="出席" ${status === '出席' ? 'checked' : ''}>
               <label for="st_${idx}_1" style="padding: 4px 8px; font-size: 13px;">出席</label>
@@ -229,13 +251,12 @@ function handleTouchMove(e) {
   signaturePadCtx.stroke();
 }
 
-// 點擊開啟簽名板 (已加入雙重強制顯示保護)
 function openSignatureModal() {
   try {
     const modal = document.getElementById('signatureModal');
     if (modal) {
-      modal.style.display = 'flex'; // 第一重保護：強制顯示
-      modal.classList.add('active'); // 第二重保護：掛上 class
+      modal.style.display = 'flex';
+      modal.classList.add('active'); 
       document.body.classList.add('modal-open');
       setTimeout(initSignaturePad, 150); 
     } else {
