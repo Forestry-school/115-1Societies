@@ -1,3 +1,79 @@
+// 這裡已經換成你提供的 GAS 網址
+const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyGrdJ8j-neGtzjsc4BXOVybWgBqtjjVsfKdxs2rh7spU6udfSXlj6grbstCaNK9XGR/exec"; 
+
+// 當網頁載入完成後，自動執行載入第一層選單（學段/時間）
+document.addEventListener("DOMContentLoaded", () => {
+  fetchCategories();
+});
+
+// 1. 載入第一層選單 (學段 / 時間)
+function fetchCategories() {
+  const categorySelect = document.getElementById("categorySelect");
+
+  fetch(`${GAS_WEB_APP_URL}?action=getCategories`)
+    .then(res => res.json())
+    .then(categories => {
+      if (!categories || categories.length === 0) {
+        categorySelect.innerHTML = '<option value="">-- 目前無資料 --</option>';
+        return;
+      }
+      
+      let html = '<option value="">-- 請選擇學段 / 時間 --</option>';
+      categories.forEach(cat => {
+        html += `<option value="${cat}">${cat}</option>`;
+      });
+      categorySelect.innerHTML = html;
+    })
+    .catch(err => {
+      console.error("載入學段失敗:", err);
+      categorySelect.innerHTML = '<option value="">-- 載入失敗，請檢查連線 --</option>';
+    });
+}
+
+// 2. 載入第二層選單 (對應的社團)
+function fetchClubCards() {
+  const category = document.getElementById("categorySelect").value;
+  const clubSelectContainer = document.getElementById("clubSelectContainer");
+  const clubSelect = document.getElementById("clubSelect");
+  const studentSection = document.getElementById("studentSection");
+  const signatureSection = document.getElementById("signatureSection");
+
+  // 如果使用者選回空值，則隱藏下方的所有區塊
+  if (!category) {
+    clubSelectContainer.style.display = "none";
+    studentSection.style.display = "none";
+    signatureSection.style.display = "none";
+    return;
+  }
+
+  // 顯示第二層選單，並呈現載入中狀態
+  clubSelectContainer.style.display = "block";
+  clubSelect.innerHTML = '<option value="">-- 載入中... --</option>';
+  
+  // 隱藏學生與簽名區塊，直到選擇了社團
+  studentSection.style.display = "none";
+  signatureSection.style.display = "none";
+
+  fetch(`${GAS_WEB_APP_URL}?action=getClubs&category=${encodeURIComponent(category)}`)
+    .then(res => res.json())
+    .then(clubs => {
+      let html = '<option value="">-- 請選擇社團 --</option>';
+      clubs.forEach(club => {
+        // 根據你的 code.gs，回傳的物件為 {id: name, name: name}
+        html += `<option value="${club.name}">${club.name}</option>`;
+      });
+      clubSelect.innerHTML = html;
+    })
+    .catch(err => {
+      console.error("載入社團失敗:", err);
+      clubSelect.innerHTML = '<option value="">-- 載入失敗 --</option>';
+    });
+}
+
+// ==========================================
+// 下方保留你原本的 fetchStudents 以及其他函數
+// function fetchStudents(retryCount = 0) { ... }
+// ==========================================
 // 3. 載入學生名單 (同時帶入 category 與 clubId)
 function fetchStudents(retryCount = 0) {
   const category = document.getElementById("categorySelect").value;
