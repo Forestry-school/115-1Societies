@@ -88,7 +88,7 @@ function fetchClubCards(retryCount = 0) {
     });
 }
 
-// 3. 載入學生名單 - 套用蠟筆手繪感底圖
+// 3. 載入學生名單 - 套用蠟筆手繪感底圖 (已移除重複社團名稱)
 function fetchStudents(retryCount = 0) {
   const category = document.getElementById("categorySelect").value;
   const clubId = document.getElementById("clubSelect").value;
@@ -135,12 +135,10 @@ function fetchStudents(retryCount = 0) {
       let html = "";
       students.forEach((s, idx) => {
         const status = existingRecords[s.seat] || "出席";
-        // 蠟筆手繪感 UI 區塊
+        // 蠟筆手繪感 UI 區塊 (乾淨版：只留座號與姓名)
         html += `
           <div class="student-item" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; margin-bottom: 12px; background-color: var(--forest-soft); border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px; flex-wrap: wrap; gap: 4px;">
             <div class="roll-id" style="display: flex; align-items: baseline; gap: 8px; min-width: 0; flex-shrink: 1;">
-              <!-- 顯示社團名稱 -->
-              <span style="color: var(--clay); font-family: 'Noto Serif TC', serif; font-weight: 900; font-size: 1.05rem; letter-spacing: 0.05em;">${clubId}</span>
               <!-- 顯示座號 -->
               <span class="seat" style="color: var(--ink); font-weight: 900; font-size: 1rem;">${s.seat}</span>
               <!-- 顯示姓名 -->
